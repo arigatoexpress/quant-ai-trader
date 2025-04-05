@@ -1,0 +1,8 @@
+data:
+  lookback_period: 100
+  timeframes:
+    - 1d
+    - 1h
+assets:
+  - BTC
+  - SUI
