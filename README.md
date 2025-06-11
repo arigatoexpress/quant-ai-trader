@@ -1,10 +1,10 @@
 # Quant AI Trader
 
 This project fetches cryptocurrency and stock market data from public APIs such
-as CoinGecko and Yahoo Finance to generate basic trading signals. If the APIs
-are unavailable, the app can fall back to deterministic synthetic data so it
-always produces output. Set `data.allow_synthetic: false` in `config.yaml` (the
-default) to raise an error instead of using synthetic prices.
+as CoinGecko and Yahoo Finance to generate basic trading signals. If those
+services fail the tool falls back to CryptoCompare and finally to deterministic
+synthetic data. Set `data.allow_synthetic: false` in `config.yaml` (the default)
+to raise an error instead of using synthetic prices.
 
 ## Setup
 

@@ -47,6 +47,8 @@ class DataFetcher:
         "CYFRF": 30,
     }
 
+    CC_URL = "https://min-api.cryptocompare.com"
+
     def __init__(self, config_path=None):
         if config_path is None:
             config_dir = os.environ.get(
@@ -140,6 +142,21 @@ class DataFetcher:
                 )
             except Exception:
                 pass
+            # CryptoCompare fallback
+            try:
+                url = f"{self.CC_URL}/data/pricemultifull"
+                params = {"fsyms": asset, "tsyms": "USD"}
+                resp = requests.get(url, params=params, timeout=10)
+                resp.raise_for_status()
+                raw = resp.json().get("RAW", {}).get(asset, {}).get("USD", {})
+                if raw:
+                    return (
+                        raw.get("PRICE"),
+                        raw.get("MKTCAP"),
+                        raw.get("CHANGEPCT24HOUR"),
+                    )
+            except Exception:
+                pass
 
         # Fallback to Yahoo Finance for stocks
         try:
@@ -192,6 +209,26 @@ class DataFetcher:
                 return df
             except Exception:
                 pass
+            # CryptoCompare fallback
+            try:
+                if timeframe == "1d":
+                    limit = self.config["data"].get("lookback_period", 30) - 1
+                    url = f"{self.CC_URL}/data/v2/histoday"
+                else:
+                    limit = min(168, self.config["data"].get("lookback_period", 7) * 24) - 1
+                    url = f"{self.CC_URL}/data/v2/histohour"
+                params = {"fsym": asset, "tsym": "USD", "limit": limit}
+                resp = requests.get(url, params=params, timeout=10)
+                resp.raise_for_status()
+                data = resp.json().get("Data", {}).get("Data", [])
+                if data:
+                    df = pd.DataFrame(data)
+                    df["timestamp"] = pd.to_datetime(df["time"], unit="s")
+                    df.set_index("timestamp", inplace=True)
+                    df = df.rename(columns={"close": "price"})
+                    return df[["price"]]
+            except Exception:
+                pass
 
         # Stocks via Yahoo Finance
         try:
@@ -234,6 +271,19 @@ class DataFetcher:
                 start = prices[0][1]
                 end = prices[-1][1]
                 return ((end - start) / start) * 100
+            except Exception:
+                pass
+            # CryptoCompare fallback
+            try:
+                url = f"{self.CC_URL}/data/v2/histoday"
+                params = {"fsym": asset, "tsym": "USD", "limit": 6}
+                resp = requests.get(url, params=params, timeout=10)
+                resp.raise_for_status()
+                data = resp.json().get("Data", {}).get("Data", [])
+                if len(data) >= 2:
+                    start = data[0]["close"]
+                    end = data[-1]["close"]
+                    return ((end - start) / start) * 100
             except Exception:
                 pass
 
