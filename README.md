@@ -1,8 +1,8 @@
 # Quant AI Trader
 
-This project generates example cryptocurrency metrics and trading signals. Real-time
-API access is disabled in this environment, so the data fetcher creates synthetic
-price series for demonstration purposes.
+This project fetches cryptocurrency market data from CoinGecko and generates
+basic trading signals. If the API is unreachable the tool falls back to
+deterministic synthetic data so it always produces output.
 
 ## Setup
 
@@ -41,5 +41,6 @@ Then access the interface from another device using your machine's IP
 address.
 
 The web view displays the same insights as the command line including a table of
-synthetic trading signals and macro/on-chain bullet points.
+trading signals, 24h/7d performance metrics and a short list of market
+highlights.
 

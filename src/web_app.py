@@ -18,15 +18,24 @@ TEMPLATE = """
 <body>
 <h1>Market Data Summary</h1>
 <table border="1" cellpadding="5">
-<tr><th>Asset</th><th>Price (USD)</th><th>Market Cap (USD)</th></tr>
+<tr><th>Asset</th><th>Price (USD)</th><th>Market Cap (USD)</th><th>24h %</th><th>7d %</th></tr>
 {% for asset, data in assets.items() %}
 <tr>
   <td>{{ asset }}</td>
   <td>{{ data.price }}</td>
   <td>{{ data.market_cap }}</td>
+  <td>{{ data.change_24h }}</td>
+  <td>{{ data.change_7d }}</td>
 </tr>
 {% endfor %}
 </table>
+
+<h2>Market Highlights</h2>
+<ul>
+{% for item in highlights %}
+  <li>{{ item }}</li>
+{% endfor %}
+</ul>
 
 <h2>Macro Insights</h2>
 <ul>
@@ -63,12 +72,24 @@ TEMPLATE = """
 @app.route("/")
 def index():
     assets_data = {}
+    highlights_calc = []
     for asset in fetcher.config["assets"]:
-        price, market_cap = fetcher.fetch_price_and_market_cap(asset)
+        price, market_cap, change_24h = fetcher.fetch_price_and_market_cap(asset)
+        week_change = fetcher.fetch_week_change(asset)
+        highlights_calc.append({"asset": asset, "change_24h": change_24h, "week": week_change})
         assets_data[asset] = {
             "price": f"{price:,.2f}" if price else "N/A",
             "market_cap": f"{market_cap:,.0f}" if market_cap else "N/A",
+            "change_24h": f"{change_24h:.2f}%",
+            "change_7d": f"{week_change:.2f}%",
         }
+
+    best_24h = max(highlights_calc, key=lambda x: x["change_24h"])
+    best_week = max(highlights_calc, key=lambda x: x["week"])
+    highlights = [
+        f"Top 24h Gainer: {best_24h['asset']} ({best_24h['change_24h']:.2f}%)",
+        f"Top 7d Gainer: {best_week['asset']} ({best_week['week']:.2f}%)",
+    ]
 
     macro_data = {"ten_year_treasury": 4.7, "inflation": 3.2, "global_m2": 106e12}
     onchain_data = {"bitcoin_dominance": 58, "sui_dominance": 0.6}
@@ -84,6 +105,7 @@ def index():
         macro_insights=macro_insights,
         onchain_insights=onchain_insights,
         signals=signals,
+        highlights=highlights,
     )
 
 if __name__ == "__main__":
