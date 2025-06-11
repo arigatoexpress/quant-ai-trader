@@ -12,3 +12,4 @@ class MacroAnalyzer:
         if self.macro_data["global_m2"] > 105e12:
             insights.append("Global liquidity surge (M2 > $105T) may boost risk assets like crypto and stocks.")
         return insights if insights else ["No significant macro insights at this time."]
+

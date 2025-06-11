@@ -60,3 +60,4 @@ class TradingAgent:
         sorted_signals = sorted(signals.items(), key=lambda x: x[1]["risk_reward"], reverse=True)
         top_count = max(1, int(len(sorted_signals) * self.config["trading"]["pareto_weight"]))
         return dict(sorted_signals[:top_count])
+
