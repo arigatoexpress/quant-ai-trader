@@ -2,8 +2,9 @@
 
 This project fetches cryptocurrency and stock market data from public APIs such
 as CoinGecko and Yahoo Finance to generate basic trading signals. If the APIs
-are unavailable, the app falls back to deterministic synthetic data so it always
-produces output.
+are unavailable, the app can fall back to deterministic synthetic data so it
+always produces output. Set `data.allow_synthetic: false` in `config.yaml` (the
+default) to raise an error instead of using synthetic prices.
 
 ## Setup
 
@@ -17,7 +18,7 @@ The application now bundles a small portion of the **ElizaOS** framework. The
 embedded `ConfigLoader` lets you override settings through environment
 variables or HashiCorp Vault secrets if available. By default it loads
 `config/config.yaml` but you can specify a different directory via the
-constructor.
+environment variable `QUANT_CONFIG_DIR` or the constructor.
 
 ## Command-Line Usage
 

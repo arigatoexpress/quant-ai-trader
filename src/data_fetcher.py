@@ -49,7 +49,10 @@ class DataFetcher:
 
     def __init__(self, config_path=None):
         if config_path is None:
-            config_dir = os.path.join(os.path.dirname(__file__), "..", "config")
+            config_dir = os.environ.get(
+                "QUANT_CONFIG_DIR",
+                os.path.join(os.path.dirname(__file__), "..", "config"),
+            )
         else:
             config_dir = os.path.dirname(config_path)
         loader = ConfigLoader(use_vault=False)
@@ -84,10 +87,15 @@ class DataFetcher:
                 }
 
         # Ensure trading defaults exist if missing
-        self.config.setdefault("trading", {"risk_tolerance": 0.02, "asymmetry_threshold": 3, "pareto_weight": 0.2})
+        self.config.setdefault(
+            "trading", {"risk_tolerance": 0.02, "asymmetry_threshold": 3, "pareto_weight": 0.2}
+        )
+        self.allow_synthetic = self.config.get("data", {}).get("allow_synthetic", True)
 
     def _generate_synthetic_data(self, asset, timeframe, end=None):
         """Fallback deterministic data generator."""
+        if not self.allow_synthetic:
+            raise RuntimeError("Synthetic data disabled and real data unavailable")
         import numpy as np
         end = end or datetime.utcnow()
         lookback = self.config["data"].get("lookback_period", 30)
@@ -146,6 +154,8 @@ class DataFetcher:
         except Exception:
             pass
 
+        if not self.allow_synthetic:
+            raise RuntimeError(f"Real data unavailable for {asset}")
         df = self._generate_synthetic_data(asset, "1d", end=datetime.utcnow())
         price = float(df["price"].iloc[-1])
         supply = self.SUPPLY.get(asset, 1_000_000)
@@ -195,6 +205,8 @@ class DataFetcher:
         except Exception:
             pass
 
+        if not self.allow_synthetic:
+            raise RuntimeError(f"Real data unavailable for {asset} {timeframe}")
         return self._generate_synthetic_data(asset, timeframe, end=datetime.utcnow())
 
     def fetch_week_change(self, asset):
@@ -235,6 +247,8 @@ class DataFetcher:
         except Exception:
             pass
 
+        if not self.allow_synthetic:
+            raise RuntimeError(f"Real data unavailable for {asset}")
         df = self._generate_synthetic_data(asset, "1d", end=datetime.utcnow())
         start = df["price"].iloc[-7] if len(df) >= 7 else df["price"].iloc[0]
         end = df["price"].iloc[-1]

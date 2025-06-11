@@ -3,6 +3,7 @@ data:
   timeframes:
     - 1d
     - 1h
+  allow_synthetic: false
 assets:
   - BTC
   - ETH
