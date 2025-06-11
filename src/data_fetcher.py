@@ -3,10 +3,20 @@ from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
+import requests
 import yaml
 
 class DataFetcher:
-    """Generate synthetic market data for offline usage."""
+    """Fetch market data from CoinGecko with offline fallback."""
+
+    ID_MAP = {
+        "BTC": "bitcoin",
+        "ETH": "ethereum",
+        "SOL": "solana",
+        "SUI": "sui",
+        "USDT": "tether",
+        "USDC": "usd-coin",
+    }
 
     SUPPLY = {
         "BTC": 19_700_000,
@@ -45,14 +55,74 @@ class DataFetcher:
         return pd.DataFrame({"price": prices}, index=rng)
 
     def fetch_price_and_market_cap(self, asset):
-        """Return synthetic price and market cap for the given asset."""
+        """Return current price, market cap and 24h change."""
+        coin_id = self.ID_MAP.get(asset)
+        if coin_id:
+            try:
+                url = "https://api.coingecko.com/api/v3/simple/price"
+                params = {
+                    "ids": coin_id,
+                    "vs_currencies": "usd",
+                    "include_market_cap": "true",
+                    "include_24hr_change": "true",
+                }
+                resp = requests.get(url, params=params, timeout=10)
+                resp.raise_for_status()
+                info = resp.json()[coin_id]
+                return (
+                    info.get("usd"),
+                    info.get("usd_market_cap"),
+                    info.get("usd_24h_change", 0),
+                )
+            except Exception:
+                pass
+
         df = self._generate_synthetic_data(asset, "1d")
         price = float(df["price"].iloc[-1])
         supply = self.SUPPLY.get(asset, 1_000_000)
         market_cap = price * supply
-        return price, market_cap
+        change_24h = df["price"].pct_change().iloc[-1] * 100 if len(df) > 1 else 0
+        return price, market_cap, change_24h
 
     def fetch_market_data(self, asset, timeframe):
-        """Return OHLC data as a DataFrame."""
+        """Return historical price data as a DataFrame."""
+        coin_id = self.ID_MAP.get(asset)
+        if coin_id:
+            try:
+                if timeframe == "1d":
+                    days = self.config["data"].get("lookback_period", 30)
+                    params = {"vs_currency": "usd", "days": days, "interval": "daily"}
+                else:
+                    days = min(7, self.config["data"].get("lookback_period", 7))
+                    params = {"vs_currency": "usd", "days": days, "interval": "hourly"}
+                url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart"
+                resp = requests.get(url, params=params, timeout=10)
+                resp.raise_for_status()
+                prices = resp.json()["prices"]
+                df = pd.DataFrame(prices, columns=["timestamp", "price"])
+                df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
+                df.set_index("timestamp", inplace=True)
+                return df
+            except Exception:
+                pass
         return self._generate_synthetic_data(asset, timeframe)
+
+    def fetch_week_change(self, asset):
+        """Return 7-day percent change for the asset."""
+        coin_id = self.ID_MAP.get(asset)
+        if coin_id:
+            try:
+                url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart"
+                resp = requests.get(url, params={"vs_currency": "usd", "days": 7, "interval": "daily"}, timeout=10)
+                resp.raise_for_status()
+                prices = resp.json()["prices"]
+                start = prices[0][1]
+                end = prices[-1][1]
+                return ((end - start) / start) * 100
+            except Exception:
+                pass
+        df = self._generate_synthetic_data(asset, "1d")
+        start = df["price"].iloc[-7] if len(df) >= 7 else df["price"].iloc[0]
+        end = df["price"].iloc[-1]
+        return ((end - start) / start) * 100
 
