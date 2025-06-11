@@ -7,3 +7,5 @@ pyyaml
 scikit-learn
 python-binance
 yfinance
+Flask
+

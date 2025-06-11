@@ -1,1 +1,4 @@
-# Empty file, just create it
+"""Quant AI Trader package."""
+
+__all__ = []
+
