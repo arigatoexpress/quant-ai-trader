@@ -1,6 +1,8 @@
 # Quant AI Trader
 
-This project fetches cryptocurrency price and market cap data using the CoinGecko API.
+This project generates example cryptocurrency metrics and trading signals. Real-time
+API access is disabled in this environment, so the data fetcher creates synthetic
+price series for demonstration purposes.
 
 ## Setup
 
@@ -12,7 +14,8 @@ pip install -r requirements.txt
 
 ## Command-Line Usage
 
-Run the basic data fetcher:
+Run the tool from the command line to print market summaries, macro/on-chain
+insights and example trading signals:
 
 ```bash
 python -m src.main
@@ -36,4 +39,7 @@ FLASK_APP=src.web_app flask run --host 0.0.0.0
 
 Then access the interface from another device using your machine's IP
 address.
+
+The web view displays the same insights as the command line including a table of
+synthetic trading signals and macro/on-chain bullet points.
 

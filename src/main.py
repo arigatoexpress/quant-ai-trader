@@ -1,4 +1,7 @@
 from .data_fetcher import DataFetcher
+from .macro_analyzer import MacroAnalyzer
+from .onchain_analyzer import OnChainAnalyzer
+from .trading_agent import TradingAgent
 
 def main():
     print("Starting Quant AI Trader...")
@@ -7,12 +10,29 @@ def main():
     print("\n--- Market Data Summary ---")
     for asset in fetcher.config["assets"]:
         price, market_cap = fetcher.fetch_price_and_market_cap(asset)
-        if price and market_cap:
-            print(f"{asset}:")
-            print(f"  - Current Price: ${price:,.2f}")
-            print(f"  - Market Cap: ${market_cap:,.0f}")
-        else:
-            print(f"{asset}: Data not available")
+        print(f"{asset}:")
+        print(f"  - Current Price: ${price:,.2f}")
+        print(f"  - Market Cap: ${market_cap:,.0f}")
+        print("-" * 50)
+
+    # Example macro and on-chain data for demonstration
+    macro_data = {"ten_year_treasury": 4.7, "inflation": 3.2, "global_m2": 106e12}
+    onchain_data = {"bitcoin_dominance": 58, "sui_dominance": 0.6}
+
+    print("\n--- Macro Insights ---")
+    for insight in MacroAnalyzer(macro_data).analyze():
+        print(f"* {insight}")
+
+    print("\n--- On-chain Insights ---")
+    for insight in OnChainAnalyzer(onchain_data).analyze():
+        print(f"* {insight}")
+
+    print("\n--- Trading Signals ---")
+    agent = TradingAgent(fetcher.config, fetcher)
+    signals = agent.generate_trade_signals()
+    for key, data in signals.items():
+        print(f"{key}: {data['signal']} @ ${data['current_price']:.2f} -> {data['predicted_price']:.2f} (RR {data['risk_reward']:.2f})")
+        print(f"  Insight: {data['insight']}")
         print("-" * 50)
 
 if __name__ == "__main__":
