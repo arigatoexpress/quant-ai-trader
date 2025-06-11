@@ -1,30 +1,58 @@
-import requests
-import yaml
 import os
+from datetime import datetime, timedelta
+
+import numpy as np
+import pandas as pd
+import yaml
 
 class DataFetcher:
+    """Generate synthetic market data for offline usage."""
+
+    SUPPLY = {
+        "BTC": 19_700_000,
+        "ETH": 120_000_000,
+        "SOL": 440_000_000,
+        "SUI": 10_000_000_000,
+        "USDT": 110_000_000_000,
+        "USDC": 33_000_000_000,
+    }
+
     def __init__(self, config_path=None):
-        # Default to config.yaml in the config directory if no path is provided
         if config_path is None:
-            config_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'config.yaml')
+            config_path = os.path.join(os.path.dirname(__file__), "..", "config", "config.yaml")
         try:
-            with open(config_path, 'r') as f:
+            with open(config_path, "r") as f:
                 self.config = yaml.safe_load(f)
         except FileNotFoundError:
-            # Fallback to a default asset list if config file is missing
-            self.config = {"assets": ["BTC", "ETH", "SOL", "SUI", "USDT", "USDC"]}
+            self.config = {
+                "assets": ["BTC", "ETH", "SOL", "SUI", "USDT", "USDC"],
+                "data": {"lookback_period": 100, "timeframes": ["1d"]},
+                "trading": {"risk_tolerance": 0.02, "asymmetry_threshold": 3, "pareto_weight": 0.2},
+            }
+
+        # Ensure trading defaults exist if missing
+        self.config.setdefault("trading", {"risk_tolerance": 0.02, "asymmetry_threshold": 3, "pareto_weight": 0.2})
+
+    def _generate_synthetic_data(self, asset, timeframe):
+        """Create a deterministic random walk for the given asset."""
+        lookback = self.config["data"]["lookback_period"]
+        freq = "1D" if timeframe == "1d" else "1h"
+        end = datetime.utcnow()
+        rng = pd.date_range(end=end, periods=lookback, freq=freq)
+        seed = abs(hash(f"{asset}_{timeframe}")) % (2**32)
+        rs = np.random.RandomState(seed)
+        prices = 100 + rs.randn(len(rng)).cumsum()
+        return pd.DataFrame({"price": prices}, index=rng)
 
     def fetch_price_and_market_cap(self, asset):
-        """Fetch price and market cap for a given asset using CoinGecko API."""
-        try:
-            # CoinGecko API endpoint (asset IDs must be lowercase)
-            url = f"https://api.coingecko.com/api/v3/coins/{asset.lower()}"
-            response = requests.get(url)
-            response.raise_for_status()  # Raise an exception for bad HTTP responses
-            data = response.json()
-            price = data["market_data"]["current_price"]["usd"]
-            market_cap = data["market_data"]["market_cap"]["usd"]
-            return price, market_cap
-        except Exception as e:
-            print(f"Error fetching data for {asset}: {e}")
-            return None, None
+        """Return synthetic price and market cap for the given asset."""
+        df = self._generate_synthetic_data(asset, "1d")
+        price = float(df["price"].iloc[-1])
+        supply = self.SUPPLY.get(asset, 1_000_000)
+        market_cap = price * supply
+        return price, market_cap
+
+    def fetch_market_data(self, asset, timeframe):
+        """Return OHLC data as a DataFrame."""
+        return self._generate_synthetic_data(asset, timeframe)
+
