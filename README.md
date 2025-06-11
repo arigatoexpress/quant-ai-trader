@@ -13,6 +13,12 @@ Install dependencies with:
 pip install -r requirements.txt
 ```
 
+The application now bundles a small portion of the **ElizaOS** framework. The
+embedded `ConfigLoader` lets you override settings through environment
+variables or HashiCorp Vault secrets if available. By default it loads
+`config/config.yaml` but you can specify a different directory via the
+constructor.
+
 ## Command-Line Usage
 
 Run the tool from the command line to print market summaries, macro/on-chain

@@ -7,6 +7,7 @@ from .onchain_analyzer import OnChainAnalyzer
 from .technical_analyzer import TechnicalAnalyzer
 from .news_analyzer import NewsAnalyzer
 from .ai_analyzer import AIAnalyzer
+from .elizaos import ConfigLoader
 
 __all__ = [
     "DataFetcher",
@@ -16,5 +17,6 @@ __all__ = [
     "TechnicalAnalyzer",
     "NewsAnalyzer",
     "AIAnalyzer",
+    "ConfigLoader",
 ]
 

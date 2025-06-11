@@ -10,4 +10,5 @@ yfinance
 Flask
 torch
 matplotlib
+hvac==0.5.0
 

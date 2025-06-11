@@ -5,6 +5,7 @@ import pandas as pd
 import requests
 import yaml
 import yfinance as yf
+from .elizaos import ConfigLoader, ConfigLoaderError
 
 class DataFetcher:
     """Fetch market data from public APIs."""
@@ -48,29 +49,39 @@ class DataFetcher:
 
     def __init__(self, config_path=None):
         if config_path is None:
-            config_path = os.path.join(os.path.dirname(__file__), "..", "config", "config.yaml")
+            config_dir = os.path.join(os.path.dirname(__file__), "..", "config")
+        else:
+            config_dir = os.path.dirname(config_path)
+        loader = ConfigLoader(use_vault=False)
         try:
-            with open(config_path, "r") as f:
-                self.config = yaml.safe_load(f)
-        except FileNotFoundError:
-            self.config = {
-                "assets": [
-                    "BTC",
-                    "ETH",
-                    "SOL",
-                    "SUI",
-                    "BNB",
-                    "DOGE",
-                    "MSTR",
-                    "TSLA",
-                    "CYFRF",
-                    "SUI/BTC",
-                    "SOL/BTC",
-                    "ETH/BTC",
-                ],
-                "data": {"lookback_period": 100, "timeframes": ["1d"]},
-                "trading": {"risk_tolerance": 0.02, "asymmetry_threshold": 3, "pareto_weight": 0.2},
-            }
+            self.config = loader.load_config(config_dir, "config")
+        except ConfigLoaderError:
+            try:
+                with open(os.path.join(config_dir, "config.yaml"), "r") as f:
+                    self.config = yaml.safe_load(f)
+            except FileNotFoundError:
+                self.config = {
+                    "assets": [
+                        "BTC",
+                        "ETH",
+                        "SOL",
+                        "SUI",
+                        "BNB",
+                        "DOGE",
+                        "MSTR",
+                        "TSLA",
+                        "CYFRF",
+                        "SUI/BTC",
+                        "SOL/BTC",
+                        "ETH/BTC",
+                    ],
+                    "data": {"lookback_period": 100, "timeframes": ["1d"]},
+                    "trading": {
+                        "risk_tolerance": 0.02,
+                        "asymmetry_threshold": 3,
+                        "pareto_weight": 0.2,
+                    },
+                }
 
         # Ensure trading defaults exist if missing
         self.config.setdefault("trading", {"risk_tolerance": 0.02, "asymmetry_threshold": 3, "pareto_weight": 0.2})
