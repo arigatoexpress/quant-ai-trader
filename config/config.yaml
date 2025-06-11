@@ -5,4 +5,14 @@ data:
     - 1h
 assets:
   - BTC
+  - ETH
+  - SOL
   - SUI
+  - BNB
+  - DOGE
+  - MSTR
+  - TSLA
+  - CYFRF
+  - "SUI/BTC"
+  - "SOL/BTC"
+  - "ETH/BTC"
