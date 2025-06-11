@@ -1,7 +1,9 @@
 # Quant AI Trader
 
 This project fetches cryptocurrency and stock market data from public APIs such
-as CoinGecko and Yahoo Finance to generate basic trading signals.
+as CoinGecko and Yahoo Finance to generate basic trading signals. If the APIs
+are unavailable, the app falls back to deterministic synthetic data so it always
+produces output.
 
 ## Setup
 
