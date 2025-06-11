@@ -28,3 +28,4 @@ class DataFetcher:
         except Exception as e:
             print(f"Error fetching data for {asset}: {e}")
             return None, None
+
