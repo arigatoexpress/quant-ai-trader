@@ -7,3 +7,8 @@ pyyaml
 scikit-learn
 python-binance
 yfinance
+Flask
+torch
+matplotlib
+hvac>=2.3.0
+

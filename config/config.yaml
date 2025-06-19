@@ -3,6 +3,17 @@ data:
   timeframes:
     - 1d
     - 1h
+  allow_synthetic: false
 assets:
   - BTC
+  - ETH
+  - SOL
   - SUI
+  - BNB
+  - DOGE
+  - MSTR
+  - TSLA
+  - CYFRF
+  - "SUI/BTC"
+  - "SOL/BTC"
+  - "ETH/BTC"

@@ -1,12 +1,14 @@
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from .utils import calculate_momentum, calculate_risk_reward
+from .ai_analyzer import AIAnalyzer
 
 class TradingAgent:
     def __init__(self, config, data_fetcher):
         self.config = config
         self.data_fetcher = data_fetcher
         self.model = LinearRegression()
+        self.ai = AIAnalyzer()
 
     def train_model(self, asset_data):
         X = asset_data.index.map(lambda x: x.timestamp()).values.reshape(-1, 1)
@@ -26,7 +28,9 @@ class TradingAgent:
                 asset_data = self.data_fetcher.fetch_market_data(asset, timeframe)
                 momentum = calculate_momentum(asset_data["price"])
                 self.train_model(asset_data)
-                predicted_price = self.predict(asset_data, timeframe)
+                lr_pred = self.predict(asset_data, timeframe)
+                ai_pred = self.ai.train_and_predict(asset_data["price"])
+                predicted_price = ai_pred
                 current_price = asset_data["price"].iloc[-1]
                 risk_reward = calculate_risk_reward(current_price, predicted_price, self.config["trading"]["risk_tolerance"])
 
@@ -37,7 +41,8 @@ class TradingAgent:
                         "current_price": current_price,
                         "predicted_price": predicted_price,
                         "risk_reward": risk_reward,
-                        "insight": f"{asset} ({timeframe}): High asymmetry trade detected."
+                        "insight": f"{asset} ({timeframe}): High asymmetry trade detected.",
+                        "ai_insight": f"AI predicts {predicted_price:.2f}"
                     }
                 elif momentum < -0.02:  # Exit condition
                     signals[f"{asset}_{timeframe}"] = {
@@ -45,7 +50,8 @@ class TradingAgent:
                         "current_price": current_price,
                         "predicted_price": predicted_price,
                         "risk_reward": risk_reward,
-                        "insight": f"{asset} ({timeframe}): Momentum fading."
+                        "insight": f"{asset} ({timeframe}): Momentum fading.",
+                        "ai_insight": f"AI predicts {predicted_price:.2f}"
                     }
                 else:
                     signals[f"{asset}_{timeframe}"] = {
@@ -53,10 +59,12 @@ class TradingAgent:
                         "current_price": current_price,
                         "predicted_price": predicted_price,
                         "risk_reward": risk_reward,
-                        "insight": f"{asset} ({timeframe}): No asymmetric opportunity."
+                        "insight": f"{asset} ({timeframe}): No asymmetric opportunity.",
+                        "ai_insight": f"AI predicts {predicted_price:.2f}"
                     }
 
         # Apply Pareto rule: Sort by risk_reward and take top 20%
         sorted_signals = sorted(signals.items(), key=lambda x: x[1]["risk_reward"], reverse=True)
         top_count = max(1, int(len(sorted_signals) * self.config["trading"]["pareto_weight"]))
         return dict(sorted_signals[:top_count])
+
