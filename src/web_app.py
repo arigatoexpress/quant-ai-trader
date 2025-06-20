@@ -95,6 +95,7 @@ TEMPLATE = """
 </html>
 """
 
+
 @app.route("/")
 def index():
     assets_data = {}
@@ -105,7 +106,9 @@ def index():
             week_change = fetcher.fetch_week_change(asset)
         except Exception:
             continue
-        highlights_calc.append({"asset": asset, "change_24h": change_24h, "week": week_change})
+        highlights_calc.append(
+            {"asset": asset, "change_24h": change_24h, "week": week_change}
+        )
         assets_data[asset] = {
             "price": f"{price:,.2f}" if price else "N/A",
             "market_cap": f"{market_cap:,.0f}" if market_cap else "N/A",
@@ -141,16 +144,16 @@ def index():
     agent = TradingAgent(fetcher.config, fetcher)
     signals = agent.generate_trade_signals()
     charts = {}
-    os.makedirs('charts', exist_ok=True)
+    os.makedirs("charts", exist_ok=True)
     for pair, sig in signals.items():
-        asset, tf = pair.split('_')
+        asset, tf = pair.split("_")
         try:
             df = fetcher.fetch_market_data(asset, tf)
             filename = sanitize_filename(pair)
             chart_path = f"charts/{filename}.png"
-            plot_price_chart(df['price'], sig['predicted_price'], chart_path)
-            with open(chart_path, 'rb') as f:
-                charts[pair] = base64.b64encode(f.read()).decode('utf-8')
+            plot_price_chart(df["price"], sig["predicted_price"], chart_path)
+            with open(chart_path, "rb") as f:
+                charts[pair] = base64.b64encode(f.read()).decode("utf-8")
         except Exception:
             continue
 
@@ -166,6 +169,6 @@ def index():
         highlights=highlights,
     )
 
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-

@@ -7,6 +7,7 @@ from .technical_analyzer import TechnicalAnalyzer
 from .trading_agent import TradingAgent
 from .utils import plot_price_chart, sanitize_filename
 
+
 def main():
     print("Starting Quant AI Trader...")
     fetcher = DataFetcher()
@@ -22,7 +23,9 @@ def main():
         except Exception as e:
             print(f"Failed to fetch data for {asset}: {e}")
             continue
-        highlights.append({"asset": asset, "change_24h": change_24h, "week": week_change})
+        highlights.append(
+            {"asset": asset, "change_24h": change_24h, "week": week_change}
+        )
         print(f"{asset}:")
         print(f"  - Current Price: ${price:,.2f}")
         if market_cap:
@@ -70,21 +73,23 @@ def main():
     agent = TradingAgent(fetcher.config, fetcher)
     signals = agent.generate_trade_signals()
     for key, data in signals.items():
-        print(f"{key}: {data['signal']} @ ${data['current_price']:.2f} -> {data['predicted_price']:.2f} (RR {data['risk_reward']:.2f})")
+        print(
+            f"{key}: {data['signal']} @ ${data['current_price']:.2f} -> {data['predicted_price']:.2f} (RR {data['risk_reward']:.2f})"
+        )
         print(f"  Insight: {data['insight']}")
         print(f"  AI Insight: {data['ai_insight']}")
-        asset, tf = key.split('_')
+        asset, tf = key.split("_")
         try:
             df = fetcher.fetch_market_data(asset, tf)
             filename = sanitize_filename(key)
             chart_path = f"charts/{filename}.png"
-            os.makedirs('charts', exist_ok=True)
-            plot_price_chart(df['price'], data['predicted_price'], chart_path)
+            os.makedirs("charts", exist_ok=True)
+            plot_price_chart(df["price"], data["predicted_price"], chart_path)
             print(f"  Chart saved to {chart_path}")
         except Exception as e:
             print(f"  Failed to create chart for {key}: {e}")
         print("-" * 50)
 
+
 if __name__ == "__main__":
     main()
-

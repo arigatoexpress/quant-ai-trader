@@ -2,8 +2,10 @@ import torch
 import torch.nn as nn
 import numpy as np
 
+
 def device():
     return "cuda" if torch.cuda.is_available() else "cpu"
+
 
 class AIAnalyzer:
     """Simple neural network predictor for price data."""
@@ -23,7 +25,7 @@ class AIAnalyzer:
     def train_and_predict(self, price_series):
         if len(price_series) <= self.lookback:
             return price_series.iloc[-1]
-        data = price_series.values.astype('float32')
+        data = price_series.values.astype("float32")
         X = []
         y = []
         for i in range(len(data) - self.lookback):
@@ -40,7 +42,9 @@ class AIAnalyzer:
             loss = loss_fn(out, y)
             loss.backward()
             optim.step()
-        last_seq = torch.tensor(data[-self.lookback:], dtype=torch.float32, device=device()).view(1, -1)
+        last_seq = torch.tensor(
+            data[-self.lookback :], dtype=torch.float32, device=device()
+        ).view(1, -1)
         with torch.no_grad():
             pred = model(last_seq).item()
         return float(pred)

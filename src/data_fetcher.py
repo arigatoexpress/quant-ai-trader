@@ -7,6 +7,7 @@ import yaml
 import yfinance as yf
 from .elizaos import ConfigLoader, ConfigLoaderError
 
+
 class DataFetcher:
     """Fetch market data from public APIs."""
 
@@ -90,7 +91,8 @@ class DataFetcher:
 
         # Ensure trading defaults exist if missing
         self.config.setdefault(
-            "trading", {"risk_tolerance": 0.02, "asymmetry_threshold": 3, "pareto_weight": 0.2}
+            "trading",
+            {"risk_tolerance": 0.02, "asymmetry_threshold": 3, "pareto_weight": 0.2},
         )
         self.allow_synthetic = self.config.get("data", {}).get("allow_synthetic", True)
 
@@ -104,6 +106,7 @@ class DataFetcher:
         if not self.allow_synthetic:
             raise RuntimeError("Synthetic data disabled and real data unavailable")
         import numpy as np
+
         end = end or datetime.utcnow()
         lookback = self.config["data"].get("lookback_period", 30)
         freq = "1D" if timeframe == "1d" else "1h"
@@ -114,7 +117,6 @@ class DataFetcher:
         returns = rs.normal(0, 0.01, len(rng))
         prices = base_price * (1 + returns).cumprod()
         return pd.DataFrame({"price": prices}, index=rng)
-
 
     def fetch_price_and_market_cap(self, asset):
         """Return current price, market cap and 24h change."""
@@ -139,7 +141,12 @@ class DataFetcher:
                     "include_market_cap": "true",
                     "include_24hr_change": "true",
                 }
-                resp = requests.get(url, params=params, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+                resp = requests.get(
+                    url,
+                    params=params,
+                    timeout=10,
+                    headers={"User-Agent": "Mozilla/5.0"},
+                )
                 resp.raise_for_status()
                 info = resp.json()[coin_id]
                 result = (
@@ -195,9 +202,7 @@ class DataFetcher:
             df.set_index("timestamp", inplace=True)
             price = float(df["price"].iloc[-1])
             market_cap = price * self.SUPPLY.get(asset, 1_000_000)
-            change_24h = (
-                df["price"].pct_change().iloc[-1] * 100 if len(df) > 1 else 0
-            )
+            change_24h = df["price"].pct_change().iloc[-1] * 100 if len(df) > 1 else 0
             result = (price, market_cap, change_24h)
             self._price_cache[asset] = result
             return result
@@ -239,7 +244,12 @@ class DataFetcher:
                     days = min(7, self.config["data"].get("lookback_period", 7))
                     params = {"vs_currency": "usd", "days": days, "interval": "hourly"}
                 url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart"
-                resp = requests.get(url, params=params, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+                resp = requests.get(
+                    url,
+                    params=params,
+                    timeout=10,
+                    headers={"User-Agent": "Mozilla/5.0"},
+                )
                 resp.raise_for_status()
                 prices = resp.json()["prices"]
                 df = pd.DataFrame(prices, columns=["timestamp", "price"])
@@ -255,7 +265,9 @@ class DataFetcher:
                     limit = self.config["data"].get("lookback_period", 30) - 1
                     url = f"{self.CC_URL}/data/v2/histoday"
                 else:
-                    limit = min(168, self.config["data"].get("lookback_period", 7) * 24) - 1
+                    limit = (
+                        min(168, self.config["data"].get("lookback_period", 7) * 24) - 1
+                    )
                     url = f"{self.CC_URL}/data/v2/histohour"
                 params = {"fsym": asset, "tsym": "USD", "limit": limit}
                 resp = requests.get(url, params=params, timeout=10)
@@ -391,4 +403,3 @@ class DataFetcher:
         result = ((end - start) / start) * 100
         self._week_cache[asset] = result
         return result
-

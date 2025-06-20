@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 class TechnicalAnalyzer:
     """Generate simple technical analysis insights."""
 
