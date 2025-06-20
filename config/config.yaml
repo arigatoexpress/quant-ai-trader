@@ -3,6 +3,19 @@ data:
   timeframes:
     - 1d
     - 1h
+  allow_synthetic: false
+sui:
+  rpc_url: https://fullnode.mainnet.sui.io:443
 assets:
   - BTC
+  - ETH
+  - SOL
   - SUI
+  - BNB
+  - DOGE
+  - MSTR
+  - TSLA
+  - CYFRF
+  - "SUI/BTC"
+  - "SOL/BTC"
+  - "ETH/BTC"
