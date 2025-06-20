@@ -4,7 +4,9 @@ This project fetches cryptocurrency and stock market data from public APIs such
 as CoinGecko and Yahoo Finance to generate basic trading signals. If those
 services fail the tool falls back to CryptoCompare and finally to deterministic
 synthetic data. Set `data.allow_synthetic: false` in `config.yaml` (the default)
-to raise an error instead of using synthetic prices.
+to raise an error instead of using synthetic prices. If network access is not
+available, the application loads cached historical prices from the `data/`
+folder before resorting to synthetic values.
 Market data and price history are cached in memory during execution to reduce
 API calls and speed up analysis.
 

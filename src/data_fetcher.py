@@ -168,7 +168,6 @@ class DataFetcher:
                     return result
             except Exception:
                 pass
-
         # Fallback to Yahoo Finance for stocks
         try:
             ticker = yf.Ticker(asset)
@@ -181,6 +180,27 @@ class DataFetcher:
                 result = (float(price), market_cap, float(change_24h))
                 self._price_cache[asset] = result
                 return result
+        except Exception:
+            pass
+
+        # Offline CSV fallback
+        try:
+            data_dir = os.environ.get(
+                "QUANT_DATA_DIR",
+                os.path.join(os.path.dirname(__file__), "..", "data"),
+            )
+            path = os.path.join(data_dir, f"{asset}.csv")
+            df = pd.read_csv(path)
+            df["timestamp"] = pd.to_datetime(df["timestamp"])
+            df.set_index("timestamp", inplace=True)
+            price = float(df["price"].iloc[-1])
+            market_cap = price * self.SUPPLY.get(asset, 1_000_000)
+            change_24h = (
+                df["price"].pct_change().iloc[-1] * 100 if len(df) > 1 else 0
+            )
+            result = (price, market_cap, change_24h)
+            self._price_cache[asset] = result
+            return result
         except Exception:
             pass
 
@@ -265,6 +285,21 @@ class DataFetcher:
         except Exception:
             pass
 
+        # Offline CSV fallback
+        try:
+            data_dir = os.environ.get(
+                "QUANT_DATA_DIR",
+                os.path.join(os.path.dirname(__file__), "..", "data"),
+            )
+            path = os.path.join(data_dir, f"{asset}.csv")
+            df = pd.read_csv(path)
+            df["timestamp"] = pd.to_datetime(df["timestamp"])
+            df.set_index("timestamp", inplace=True)
+            self._market_cache[cache_key] = df
+            return df
+        except Exception:
+            pass
+
         if not self.allow_synthetic:
             raise RuntimeError(f"Real data unavailable for {asset} {timeframe}")
         df = self._generate_synthetic_data(asset, timeframe, end=datetime.utcnow())
@@ -329,6 +364,22 @@ class DataFetcher:
                 result = ((end - start) / start) * 100
                 self._week_cache[asset] = result
                 return result
+        except Exception:
+            pass
+
+        # Offline CSV fallback
+        try:
+            data_dir = os.environ.get(
+                "QUANT_DATA_DIR",
+                os.path.join(os.path.dirname(__file__), "..", "data"),
+            )
+            path = os.path.join(data_dir, f"{asset}.csv")
+            df = pd.read_csv(path)
+            start = df["price"].iloc[-7] if len(df) >= 7 else df["price"].iloc[0]
+            end = df["price"].iloc[-1]
+            result = ((end - start) / start) * 100
+            self._week_cache[asset] = result
+            return result
         except Exception:
             pass
 

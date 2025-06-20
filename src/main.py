@@ -31,12 +31,15 @@ def main():
         print(f"  - 7d Change: {week_change:.2f}%")
         print("-" * 50)
 
-    best_24h = max(highlights, key=lambda x: x["change_24h"])
-    best_week = max(highlights, key=lambda x: x["week"])
+    if highlights:
+        best_24h = max(highlights, key=lambda x: x["change_24h"])
+        best_week = max(highlights, key=lambda x: x["week"])
 
-    print("\n--- Market Highlights ---")
-    print(f"Top 24h Gainer: {best_24h['asset']} ({best_24h['change_24h']:.2f}%)")
-    print(f"Top 7d Gainer: {best_week['asset']} ({best_week['week']:.2f}%)")
+        print("\n--- Market Highlights ---")
+        print(f"Top 24h Gainer: {best_24h['asset']} ({best_24h['change_24h']:.2f}%)")
+        print(f"Top 7d Gainer: {best_week['asset']} ({best_week['week']:.2f}%)")
+    else:
+        print("\nNo market data available.")
 
     print("\n--- Market News ---")
     for headline in news.fetch_news():

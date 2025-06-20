@@ -113,12 +113,15 @@ def index():
             "change_7d": f"{week_change:.2f}%",
         }
 
-    best_24h = max(highlights_calc, key=lambda x: x["change_24h"])
-    best_week = max(highlights_calc, key=lambda x: x["week"])
-    highlights = [
-        f"Top 24h Gainer: {best_24h['asset']} ({best_24h['change_24h']:.2f}%)",
-        f"Top 7d Gainer: {best_week['asset']} ({best_week['week']:.2f}%)",
-    ]
+    if highlights_calc:
+        best_24h = max(highlights_calc, key=lambda x: x["change_24h"])
+        best_week = max(highlights_calc, key=lambda x: x["week"])
+        highlights = [
+            f"Top 24h Gainer: {best_24h['asset']} ({best_24h['change_24h']:.2f}%)",
+            f"Top 7d Gainer: {best_week['asset']} ({best_week['week']:.2f}%)",
+        ]
+    else:
+        highlights = ["No market data available."]
 
     news_items = NewsAnalyzer().fetch_news()
     ta = {}
