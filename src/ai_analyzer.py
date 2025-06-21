@@ -31,8 +31,10 @@ class AIAnalyzer:
         for i in range(len(data) - self.lookback):
             X.append(data[i : i + self.lookback])
             y.append(data[i + self.lookback])
-        X = torch.tensor(np.array(X), dtype=torch.float32, device=device())
-        y = torch.tensor(np.array(y), dtype=torch.float32, device=device()).view(-1, 1)
+        X = np.asarray(X, dtype=np.float32)
+        y = np.asarray(y, dtype=np.float32).reshape(-1, 1)
+        X = torch.tensor(X, device=device())
+        y = torch.tensor(y, device=device())
         model = self._build_model(self.lookback).to(device())
         loss_fn = nn.MSELoss()
         optim = torch.optim.Adam(model.parameters(), lr=self.lr)

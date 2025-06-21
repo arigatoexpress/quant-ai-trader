@@ -192,6 +192,21 @@ class DataFetcher:
                     return result
             except Exception:
                 pass
+            # Binance fallback
+            try:
+                symbol = f"{asset}USDT"
+                url = f"https://api.binance.com/api/v3/ticker/24hr"
+                resp = requests.get(url, params={"symbol": symbol}, timeout=10)
+                resp.raise_for_status()
+                info = resp.json()
+                price = float(info["lastPrice"])
+                change = float(info["priceChangePercent"])
+                market_cap = price * self.SUPPLY.get(asset, 1_000_000)
+                result = (price, market_cap, change)
+                self._price_cache[asset] = result
+                return result
+            except Exception:
+                pass
         # Fallback to Yahoo Finance for stocks
         try:
             ticker = yf.Ticker(asset)
@@ -302,6 +317,41 @@ class DataFetcher:
                     return df
             except Exception:
                 pass
+            # Binance fallback
+            try:
+                symbol = f"{asset}USDT"
+                interval = "1d" if timeframe == "1d" else "1h"
+                limit = self.config["data"].get("lookback_period", 30)
+                url = "https://api.binance.com/api/v3/klines"
+                params = {"symbol": symbol, "interval": interval, "limit": limit}
+                resp = requests.get(url, params=params, timeout=10)
+                resp.raise_for_status()
+                data = resp.json()
+                if data:
+                    df = pd.DataFrame(
+                        data,
+                        columns=[
+                            "timestamp",
+                            "open",
+                            "high",
+                            "low",
+                            "close",
+                            "volume",
+                            "close_time",
+                            "quote_asset_volume",
+                            "number_of_trades",
+                            "taker_buy_base_volume",
+                            "taker_buy_quote_volume",
+                            "ignore",
+                        ],
+                    )
+                    df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
+                    df.set_index("timestamp", inplace=True)
+                    df = df[["close"]].rename(columns={"close": "price"})
+                    self._market_cache[cache_key] = df
+                    return df
+            except Exception:
+                pass
 
         # Stocks via Yahoo Finance
         try:
@@ -380,6 +430,22 @@ class DataFetcher:
                 if len(data) >= 2:
                     start = data[0]["close"]
                     end = data[-1]["close"]
+                    result = ((end - start) / start) * 100
+                    self._week_cache[asset] = result
+                    return result
+            except Exception:
+                pass
+            # Binance fallback
+            try:
+                symbol = f"{asset}USDT"
+                url = "https://api.binance.com/api/v3/klines"
+                params = {"symbol": symbol, "interval": "1d", "limit": 7}
+                resp = requests.get(url, params=params, timeout=10)
+                resp.raise_for_status()
+                data = resp.json()
+                if len(data) >= 2:
+                    start = float(data[0][4])
+                    end = float(data[-1][4])
                     result = ((end - start) / start) * 100
                     self._week_cache[asset] = result
                     return result

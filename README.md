@@ -1,13 +1,12 @@
 # Quant AI Trader
 
-This project fetches cryptocurrency and stock market data from public APIs such
-as CoinGecko and Yahoo Finance to generate basic trading signals. If those
-services fail the tool falls back to CryptoCompare and finally to deterministic
-synthetic data. Set `data.allow_synthetic: false` in `config.yaml` (the default)
-to raise an error instead of using synthetic prices. If network access is not
-available, the application loads cached historical prices from the `data/`
-folder when the environment variable `QUANT_ALLOW_CACHE=1` is set before
-resorting to synthetic values.
+This project fetches cryptocurrency and stock market data from several public
+APIs including CoinGecko, CryptoCompare and Binance. Stocks are retrieved from
+Yahoo Finance. If all online feeds fail the tool can fall back to deterministic
+synthetic data. Set `data.allow_synthetic: false` in `config.yaml` (the
+default) to raise an error instead of using synthetic prices. When network
+access is blocked you may set `QUANT_ALLOW_CACHE=1` to load the bundled CSV
+history in the `data/` folder before resorting to synthetic values.
 Market data and price history are cached in memory during execution to reduce
 API calls and speed up analysis.
 The application also integrates the **pysui** client to query basic
@@ -24,11 +23,13 @@ Install dependencies with:
 pip install -r requirements.txt
 ```
 
-The application now bundles a small portion of the **ElizaOS** framework. The
-embedded `ConfigLoader` lets you override settings through environment
-variables or HashiCorp Vault secrets if available. By default it loads
-`config/config.yaml` but you can specify a different directory via the
-environment variable `QUANT_CONFIG_DIR` or the constructor.
+The application bundles a small portion of the **ElizaOS** framework. Its
+`ConfigLoader` reads `config/config.yaml` and allows overrides via environment
+variables or HashiCorp Vault. Set `QUANT_CONFIG_DIR` to point at an alternative
+configuration directory if you want to maintain multiple configurations. Values
+in the YAML can reference environment variables using the `<%= ENV['VAR'] %>`
+syntax and Vault secrets with `<%= VAULT['path/to/secret'] %>`. When Vault is
+not configured the loader simply ignores those references.
 
 ## Command-Line Usage
 
