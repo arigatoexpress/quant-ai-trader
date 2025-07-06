@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -7,7 +7,7 @@ import requests
 import yaml
 
 class DataFetcher:
-    """Fetch market data from CoinGecko with offline fallback."""
+    """Fetch market data from CoinGecko."""
 
     ID_MAP = {
         "BTC": "bitcoin",
@@ -16,6 +16,7 @@ class DataFetcher:
         "SUI": "sui",
         "USDT": "tether",
         "USDC": "usd-coin",
+        "SEI": "sei-network",
     }
 
     SUPPLY = {
@@ -25,6 +26,7 @@ class DataFetcher:
         "SUI": 10_000_000_000,
         "USDT": 110_000_000_000,
         "USDC": 33_000_000_000,
+        "SEI": 10_000_000_000,
     }
 
     def __init__(self, config_path=None):
@@ -35,17 +37,21 @@ class DataFetcher:
                 self.config = yaml.safe_load(f)
         except FileNotFoundError:
             self.config = {
-                "assets": ["BTC", "ETH", "SOL", "SUI", "USDT", "USDC"],
-                "data": {"lookback_period": 100, "timeframes": ["1d"]},
-                "trading": {"risk_tolerance": 0.02, "asymmetry_threshold": 3, "pareto_weight": 0.2},
+                "assets": ["BTC", "SOL", "SUI", "SEI"],
+                "data": {"lookback_period": 100, "timeframes": ["1d", "1h"]},
+                "trading": {
+                    "risk_tolerance": 0.02,
+                    "asymmetry_threshold": 3,
+                    "pareto_weight": 0.2,
+                },
             }
 
         # Ensure trading defaults exist if missing
         self.config.setdefault("trading", {"risk_tolerance": 0.02, "asymmetry_threshold": 3, "pareto_weight": 0.2})
 
     def _generate_synthetic_data(self, asset, timeframe):
-        """Create a deterministic random walk for the given asset."""
-        lookback = self.config["data"]["lookback_period"]
+        """Create deterministic synthetic prices for offline fallback."""
+        lookback = self.config["data"].get("lookback_period", 30)
         freq = "1D" if timeframe == "1d" else "1h"
         end = datetime.utcnow()
         rng = pd.date_range(end=end, periods=lookback, freq=freq)
@@ -53,6 +59,7 @@ class DataFetcher:
         rs = np.random.RandomState(seed)
         prices = 100 + rs.randn(len(rng)).cumsum()
         return pd.DataFrame({"price": prices}, index=rng)
+
 
     def fetch_price_and_market_cap(self, asset):
         """Return current price, market cap and 24h change."""
@@ -125,4 +132,26 @@ class DataFetcher:
         start = df["price"].iloc[-7] if len(df) >= 7 else df["price"].iloc[0]
         end = df["price"].iloc[-1]
         return ((end - start) / start) * 100
+
+    def fetch_ecosystem_coins(self, asset, limit=5):
+        """Return symbols of top coins in the asset's ecosystem."""
+        coin_id = self.ID_MAP.get(asset)
+        if not coin_id:
+            return []
+        try:
+            url = "https://api.coingecko.com/api/v3/coins/markets"
+            params = {
+                "vs_currency": "usd",
+                "category": f"{coin_id}-ecosystem",
+                "order": "market_cap_desc",
+                "per_page": limit,
+                "page": 1,
+                "sparkline": "false",
+            }
+            resp = requests.get(url, params=params, timeout=10)
+            resp.raise_for_status()
+            data = resp.json()
+            return [d.get("symbol", "").upper() for d in data]
+        except Exception:
+            return []
 
