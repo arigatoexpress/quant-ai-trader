@@ -8,6 +8,7 @@ class ElizaOS:
         from .macro_analyzer import MacroAnalyzer
         from .onchain_analyzer import OnChainAnalyzer
         from .technical_analyzer import TechnicalAnalyzer
+        from .backtester import Backtester
 
         self.fetcher = DataFetcher(config_path)
         self.news_fetcher = NewsFetcher()
@@ -24,6 +25,7 @@ class ElizaOS:
         self.MacroAnalyzer = MacroAnalyzer
         self.OnChainAnalyzer = OnChainAnalyzer
         self.TechnicalAnalyzer = TechnicalAnalyzer
+        self.backtester = Backtester(self.fetcher)
 
     def gather_data(self):
         """Collect market data, insights and trade signals."""
@@ -76,6 +78,10 @@ class ElizaOS:
 
         trade_signals = self.trading_agent.generate_trade_signals()
 
+        backtests = {}
+        for asset in self.fetcher.config["assets"]:
+            backtests[asset] = self.backtester.run(asset)
+
         return {
             "assets_summary": assets_summary,
             "market_highlights": market_highlights,
@@ -85,6 +91,7 @@ class ElizaOS:
             "macro_insights": macro_insights,
             "onchain_insights": onchain_insights,
             "trade_signals": trade_signals,
+            "backtests": backtests,
             "outlook": outlook,
         }
 
@@ -147,3 +154,31 @@ class ElizaOS:
             print(f"{key}: {info['signal']} @ ${info['current_price']:.2f} -> {info['predicted_price']:.2f} (RR {info['risk_reward']:.2f})")
             print(f"  Insight: {info['insight']}")
             print("-" * 50)
+
+        print("\n--- Backtest Results ---")
+        for asset, res in data["backtests"].items():
+            if "error" in res:
+                print(f"{asset}: {res['error']}")
+            else:
+                print(f"{asset}: MSE {res['mse']:.2f}, Pred {res['last_pred']:.2f} vs Actual {res['last_actual']:.2f}")
+
+    def chat(self):
+        """Simple interactive session answering market questions."""
+        summary = self.gather_data()
+        print("Type 'quit' to exit. Ask about assets or the outlook.")
+        while True:
+            question = input("You: ").strip()
+            if question.lower() in {"quit", "exit"}:
+                break
+            if "outlook" in question.lower():
+                print(f"ElizaOS: Current market outlook is {summary['outlook']}")
+                continue
+            upper = question.upper()
+            asset_match = [a for a in self.fetcher.config["assets"] if a in upper]
+            if asset_match:
+                asset = asset_match[0]
+                tech = summary["technical"].get(asset, [])
+                print(f"ElizaOS: {asset} technical analysis -> {', '.join(tech)}")
+            else:
+                print("ElizaOS: I can discuss configured assets or market outlook.")
+

@@ -84,6 +84,19 @@ class DataFetcher:
             except Exception:
                 pass
 
+        # Try yfinance for non-crypto symbols
+        try:
+            import yfinance as yf
+            data = yf.download(asset, period="2d", progress=False)
+            if not data.empty:
+                price = float(data["Close"].iloc[-1])
+                prev = float(data["Close"].iloc[-2]) if len(data) > 1 else price
+                market_cap = price * self.SUPPLY.get(asset, 1_000_000)
+                change_24h = ((price - prev) / prev) * 100 if prev else 0
+                return price, market_cap, change_24h
+        except Exception:
+            pass
+
         df = self._generate_synthetic_data(asset, "1d")
         price = float(df["price"].iloc[-1])
         supply = self.SUPPLY.get(asset, 1_000_000)
@@ -112,6 +125,22 @@ class DataFetcher:
                 return df
             except Exception:
                 pass
+
+        # Fall back to yfinance for non-crypto symbols or API failures
+        try:
+            import yfinance as yf
+            if timeframe == "1d":
+                days = self.config["data"].get("lookback_period", 30)
+                data = yf.download(asset, period=f"{days}d", progress=False)
+            else:
+                days = min(7, self.config["data"].get("lookback_period", 7))
+                data = yf.download(asset, period=f"{days}d", interval="1h", progress=False)
+            if not data.empty:
+                data.index = pd.to_datetime(data.index)
+                return data[["Close"]].rename(columns={"Close": "price"})
+        except Exception:
+            pass
+
         return self._generate_synthetic_data(asset, timeframe)
 
     def fetch_week_change(self, asset):

@@ -1,12 +1,15 @@
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import make_pipeline
 from .utils import calculate_momentum, calculate_risk_reward
 
 class TradingAgent:
     def __init__(self, config, data_fetcher):
         self.config = config
         self.data_fetcher = data_fetcher
-        self.model = LinearRegression()
+        # Use polynomial regression for more flexible modelling
+        self.model = make_pipeline(PolynomialFeatures(degree=3), LinearRegression())
 
     def train_model(self, asset_data):
         X = asset_data.index.map(lambda x: x.timestamp()).values.reshape(-1, 1)

@@ -52,3 +52,10 @@ The new `ElizaOS` component orchestrates these modules to provide a single
 entry point for rich analytics and trade ideas, making the application act as a
 comprehensive AI trading assistant.
 
+### Backtesting and Chat
+
+Historical price data can be fetched from CoinGecko or Yahoo Finance. ElizaOS
+uses a simple regression backtester to evaluate strategies and prints model
+error metrics alongside trade signals. Run `python -m src.main` and then start
+an interactive session with `ElizaOS.chat()` to ask about asset outlooks.
+
