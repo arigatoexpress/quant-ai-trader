@@ -1,8 +1,8 @@
 # Quant AI Trader
 
 This project fetches cryptocurrency market data from CoinGecko and generates
-basic trading signals. If the API is unreachable the tool falls back to
-deterministic synthetic data so it always produces output.
+basic trading signals. If the API is unreachable, deterministic synthetic data
+is used so the app continues to run without network access.
 
 ## Setup
 
@@ -12,10 +12,13 @@ Install dependencies with:
 pip install -r requirements.txt
 ```
 
+Set a `NEWS_API_KEY` environment variable to enable news headlines fetching.
+
 ## Command-Line Usage
 
-Run the tool from the command line to print market summaries, macro/on-chain
-insights and example trading signals:
+Run the tool from the command line to print market summaries, technical
+analysis, macro/on-chain insights, recent news and example trading signals for
+BTC, SOL, SUI and SEI:
 
 ```bash
 python -m src.main
@@ -41,6 +44,7 @@ Then access the interface from another device using your machine's IP
 address.
 
 The web view displays the same insights as the command line including a table of
-trading signals, 24h/7d performance metrics and a short list of market
-highlights.
+trading signals, technical analysis, 24h/7d performance metrics and market
+headlines. The app will gracefully fall back to generated data if CoinGecko is
+unreachable, ensuring all features continue to work.
 

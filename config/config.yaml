@@ -5,4 +5,6 @@ data:
     - 1h
 assets:
   - BTC
+  - SOL
   - SUI
+  - SEI

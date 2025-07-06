@@ -24,6 +24,8 @@ class TradingAgent:
         for timeframe in self.config["data"]["timeframes"]:
             for asset in self.config["assets"]:
                 asset_data = self.data_fetcher.fetch_market_data(asset, timeframe)
+                if asset_data is None or asset_data.empty:
+                    continue
                 momentum = calculate_momentum(asset_data["price"])
                 self.train_model(asset_data)
                 predicted_price = self.predict(asset_data, timeframe)
