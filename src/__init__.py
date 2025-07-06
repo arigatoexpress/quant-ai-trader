@@ -1,4 +1,4 @@
 """Quant AI Trader package."""
 
-__all__ = []
+__all__ = ["TechnicalAnalyzer"]
 
