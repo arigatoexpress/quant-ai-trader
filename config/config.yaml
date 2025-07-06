@@ -8,3 +8,6 @@ assets:
   - SOL
   - SUI
   - SEI
+data_urls:
+  BTC:
+    raw: https://raw.githubusercontent.com/Zombie-3000/Bitfinex-historical-data/master/BTCUSD/Candles_1m/2013/merged.csv
