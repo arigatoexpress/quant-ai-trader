@@ -48,3 +48,20 @@ trading signals, technical analysis, 24h/7d performance metrics and market
 headlines. The app will gracefully fall back to generated data if CoinGecko is
 unreachable, ensuring all features continue to work.
 
+### API Endpoint
+
+The web app also exposes a JSON API for integration with other tools. Start the
+server and query:
+
+```bash
+curl http://localhost:5000/api/summary
+```
+
+This returns the latest market data, headlines and trading signals.
+
+### ElizaOS Integration
+
+A sample ElizaOS plugin is provided under `plugins/plugin-quanttrader`. Build it
+with `bun run build` and include it in your Eliza project to let agents fetch
+trading insights from this backend.
+
