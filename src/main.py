@@ -7,6 +7,10 @@ def main():
     print("Starting Quant AI Trader via ElizaOS...")
     eliza = ElizaOS()
     eliza.print_report()
+    try:
+        eliza.chat()
+    except KeyboardInterrupt:
+        print("\nExiting chat.")
 
 
 if __name__ == "__main__":
