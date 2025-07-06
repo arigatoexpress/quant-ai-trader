@@ -16,9 +16,9 @@ Set a `NEWS_API_KEY` environment variable to enable news headlines fetching.
 
 ## Command-Line Usage
 
-Run the tool from the command line to print market summaries, technical
-analysis, macro/on-chain insights, recent news and example trading signals for
-BTC, SOL, SUI and SEI:
+Run the tool from the command line to launch the enhanced **ElizaOS** agent.
+It prints consolidated market summaries, macro/on-chain analysis, technical
+signals, recent news and actionable trade ideas for BTC, SOL, SUI and SEI:
 
 ```bash
 python -m src.main
@@ -47,4 +47,8 @@ The web view displays the same insights as the command line including a table of
 trading signals, technical analysis, 24h/7d performance metrics and market
 headlines. The app will gracefully fall back to generated data if CoinGecko is
 unreachable, ensuring all features continue to work.
+
+The new `ElizaOS` component orchestrates these modules to provide a single
+entry point for rich analytics and trade ideas, making the application act as a
+comprehensive AI trading assistant.
 
