@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+import io
 
 import numpy as np
 import pandas as pd
@@ -44,10 +45,12 @@ class DataFetcher:
                     "asymmetry_threshold": 3,
                     "pareto_weight": 0.2,
                 },
+                "data_urls": {},
             }
 
         # Ensure trading defaults exist if missing
         self.config.setdefault("trading", {"risk_tolerance": 0.02, "asymmetry_threshold": 3, "pareto_weight": 0.2})
+        self.config.setdefault("data_urls", {})
 
     def _generate_synthetic_data(self, asset, timeframe):
         """Create deterministic synthetic prices for offline fallback."""
@@ -60,9 +63,43 @@ class DataFetcher:
         prices = 100 + rs.randn(len(rng)).cumsum()
         return pd.DataFrame({"price": prices}, index=rng)
 
+    def _fetch_from_data_url(self, asset, timeframe):
+        """Fetch market data from a configured CSV URL if available."""
+        url = self.config.get("data_urls", {}).get(asset, {}).get("raw")
+        if not url:
+            return None
+        try:
+            resp = requests.get(url, timeout=10)
+            resp.raise_for_status()
+            df = pd.read_csv(io.StringIO(resp.text), names=[
+                "timestamp",
+                "open",
+                "high",
+                "low",
+                "close",
+                "volume",
+            ])
+            df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
+            df.set_index("timestamp", inplace=True)
+            rule = "1D" if timeframe == "1d" else "1H"
+            df = df["close"].resample(rule).last().dropna().to_frame("price")
+            lookback = self.config["data"].get("lookback_period", 30)
+            return df.tail(lookback)
+        except Exception:
+            return None
+
 
     def fetch_price_and_market_cap(self, asset):
         """Return current price, market cap and 24h change."""
+        # Prefer CSV data source if provided
+        df = self._fetch_from_data_url(asset, "1d")
+        if df is not None and not df.empty:
+            price = float(df["price"].iloc[-1])
+            supply = self.SUPPLY.get(asset, 1_000_000)
+            market_cap = price * supply
+            change_24h = df["price"].pct_change().iloc[-1] * 100 if len(df) > 1 else 0
+            return price, market_cap, change_24h
+
         coin_id = self.ID_MAP.get(asset)
         if coin_id:
             try:
@@ -93,6 +130,10 @@ class DataFetcher:
 
     def fetch_market_data(self, asset, timeframe):
         """Return historical price data as a DataFrame."""
+        df = self._fetch_from_data_url(asset, timeframe)
+        if df is not None:
+            return df
+
         coin_id = self.ID_MAP.get(asset)
         if coin_id:
             try:
@@ -116,6 +157,12 @@ class DataFetcher:
 
     def fetch_week_change(self, asset):
         """Return 7-day percent change for the asset."""
+        df = self._fetch_from_data_url(asset, "1d")
+        if df is not None and len(df) >= 7:
+            start = df["price"].iloc[-7]
+            end = df["price"].iloc[-1]
+            return ((end - start) / start) * 100
+
         coin_id = self.ID_MAP.get(asset)
         if coin_id:
             try:
