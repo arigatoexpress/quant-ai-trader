@@ -2,7 +2,7 @@ from flask import Flask, render_template_string
 
 from data_fetcher import DataFetcher
 from macro_analyzer import MacroAnalyzer
-from onchain_analyzer import OnChainAnalyzer
+from onchain_analyzer import OnchainAnalyzer
 from trading_agent import TradingAgent
 from news_fetcher import NewsFetcher
 from technical_analyzer import TechnicalAnalyzer
@@ -124,7 +124,7 @@ def index():
     macro_data = {"ten_year_treasury": 4.7, "inflation": 3.2, "global_m2": 106e12}
     onchain_data = {"bitcoin_dominance": 58, "sui_dominance": 0.6}
     macro_insights = MacroAnalyzer(macro_data).analyze()
-    onchain_insights = OnChainAnalyzer(onchain_data).analyze()
+    onchain_insights = OnchainAnalyzer(onchain_data).analyze()
     outlook = "Bullish" if any("breakout" in i or "boost" in i or "favor" in i for i in (macro_insights + onchain_insights)) else "Neutral"
 
     technical_lines = []

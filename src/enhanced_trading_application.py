@@ -104,7 +104,7 @@ class EnhancedTradingApplication:
             # Setup secure trading
             success = self.secure_trading_system.initialize_secure_trading(
                 grok_api_key=grok_api_key,
-"YOUR_PASSWORD_HERE"master_password', 'secure_trading_password_2024')
+                user_password=security_config.get('master_password', 'secure_trading_password_2024')
             )
             
             if not success:

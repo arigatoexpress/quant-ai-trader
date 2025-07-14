@@ -101,7 +101,7 @@ class AIIntegrationFramework:
     """Comprehensive AI integration framework for autonomous trading"""
     
     def __init__(self, config_path: str = None):
-        self.config_path = config_path or '../config/config.yaml'
+        self.config_path = config_path or 'config/config.yaml'
         self.config = self._load_config()
         
         # Initialize components

@@ -1,13 +1,13 @@
 {
-  "timestamp": "2025-07-13T22:41:10.348600",
+  "timestamp": "2025-07-14T12:53:17.941929",
   "summary": {
     "total_tests": 14,
     "passed": 7,
     "failed": 7,
     "errors": 0,
     "success_rate": 50.0,
-    "total_duration": 1.0,
-    "avg_duration": 0.072
+    "total_duration": 549.29,
+    "avg_duration": 39.235
   },
   "suite_results": {
     "Data Integration": [

@@ -251,9 +251,20 @@ class AdvancedMLModels:
         # ATR (Average True Range)
         data['atr'] = ta.volatility.AverageTrueRange(data['High'], data['Low'], data['Close']).average_true_range()
         
-        # Volume indicators
-        data['volume_sma'] = ta.volume.VolumeSMAIndicator(data['Close'], data['Volume']).volume_sma()
-        data['volume_weighted_price'] = ta.volume.VolumWeightedAveragePrice(data['High'], data['Low'], data['Close'], data['Volume']).volume_weighted_average_price()
+                # Volume indicators
+        try:
+            data['volume_sma'] = ta.volume.VolumeSMAIndicator(close=data['Close'], volume=data['Volume']).volume_sma()
+        except:
+            # Fallback if VolumeSMAIndicator doesn't work
+            data['volume_sma'] = data['Volume'].rolling(window=20).mean()
+        
+        try:
+            data['volume_weighted_price'] = ta.volume.VolumWeightedAveragePrice(
+                high=data['High'], low=data['Low'], close=data['Close'], volume=data['Volume']
+            ).volume_weighted_average_price()
+        except:
+            # Fallback VWAP calculation
+            data['volume_weighted_price'] = (data['Close'] * data['Volume']).rolling(window=20).sum() / data['Volume'].rolling(window=20).sum()
         
         return data
     

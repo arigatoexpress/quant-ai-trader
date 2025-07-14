@@ -271,7 +271,7 @@ def demonstrate_complete_system():
     print("🔐 Initializing secure trading system...")
     success = secure_system.initialize_secure_trading(
         grok_api_key="SECRET_REMOVED",
-"secure_password"
+        user_password="secure_password"
     )
     
     if not success:

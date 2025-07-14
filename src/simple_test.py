@@ -119,29 +119,51 @@ def test_asymmetric_calculations():
     
     logger.info("Asymmetric calculations test passed")
 
-def test_barbell_portfolio():
-    """Test barbell portfolio allocation (flexible 75-80% safe, 20-25% risky).
-    The allocation is not a strict requirement and can be dynamically adjusted within this range.
+def test_maximum_profit_portfolio():
+    """Test maximum profit portfolio allocation focused on asymmetric opportunities.
+    The portfolio should maximize expected value through Kelly-sized positions.
     """
-    def allocate_barbell_portfolio(total_capital, safe_allocation=0.8):
-        # Allow safe_allocation to be flexible between 0.75 and 0.8
-        safe_capital = total_capital * safe_allocation
-        risky_capital = total_capital * (1 - safe_allocation)
+    def create_asymmetric_bet(symbol, expected_value, max_loss, confidence):
         return {
-            'safe_capital': safe_capital,
-            'risky_capital': risky_capital,
-            'safe_ratio': safe_allocation,
-            'risky_ratio': 1 - safe_allocation
+            'symbol': symbol,
+            'expected_value': expected_value,
+            'max_loss': max_loss,
+            'confidence_score': confidence,
+            'size': 0.0  # Will be calculated
         }
-    # Test for both 0.75 and 0.8 safe allocation
-    for safe_allocation in [0.75, 0.8]:
-        allocation = allocate_barbell_portfolio(100000, safe_allocation)
-        # Allow a small tolerance for floating point math
-        assert math.isclose(allocation['safe_capital'], 100000 * safe_allocation, rel_tol=1e-6), f"{int(safe_allocation*100)}% should be allocated to safe assets"
-        assert math.isclose(allocation['risky_capital'], 100000 * (1-safe_allocation), rel_tol=1e-6), f"{int((1-safe_allocation)*100)}% should be allocated to risky assets"
-        assert 0.75 <= allocation['safe_ratio'] <= 0.8, "Safe ratio should be between 0.75 and 0.8"
-        assert 0.2 <= allocation['risky_ratio'] <= 0.25, "Risky ratio should be between 0.2 and 0.25 (inclusive)"
-    logger.info("Barbell portfolio test (flexible) passed")
+    
+    def calculate_portfolio_metrics(bets, total_capital):
+        total_ev = sum(bet['expected_value'] * bet['size'] for bet in bets)
+        total_allocation = sum(bet['size'] for bet in bets)
+        expected_return = total_ev / total_capital
+        
+        return {
+            'total_expected_value': total_ev,
+            'total_allocation': total_allocation,
+            'expected_return': expected_return,
+            'num_positions': len(bets)
+        }
+    
+    # Create test asymmetric bets
+    bets = [
+        create_asymmetric_bet('BTC', 1000, 500, 0.8),
+        create_asymmetric_bet('ETH', 800, 400, 0.75),
+        create_asymmetric_bet('SOL', 600, 300, 0.7)
+    ]
+    
+    # Simulate Kelly sizing (simplified)
+    for bet in bets:
+        bet['size'] = min(0.25, bet['confidence_score'] * 0.3)  # Max 25% position
+    
+    metrics = calculate_portfolio_metrics(bets, 100000)
+    
+    # Verify maximum profit focus
+    assert metrics['expected_return'] > 0, "Portfolio should have positive expected return"
+    assert metrics['total_allocation'] <= 1.0, "Total allocation should not exceed 100%"
+    assert metrics['num_positions'] >= 1, "Portfolio should have at least one position"
+    assert all(bet['size'] <= 0.25 for bet in bets), "No single position should exceed 25%"
+    
+    logger.info("Maximum profit portfolio test passed")
 
 def test_fat_tail_risk():
     """Test fat tail risk calculations"""
@@ -338,7 +360,7 @@ def test_security_validation():
     # Test with clean code (using environment variables)
     clean_code = """
     api_key = os.getenv('API_KEY')
-"YOUR_PASSWORD_HERE"PASSWORD')
+os.getenv("TEST_PASSWORD", "test_password")
     secret_key = os.getenv('SECRET_KEY')
     """
     is_clean, secrets = validate_secrets_in_code(clean_code)
@@ -413,7 +435,7 @@ async def main():
     tests = [
         ("Data Structures", test_data_structures),
         ("Asymmetric Calculations", test_asymmetric_calculations),
-        ("Barbell Portfolio", test_barbell_portfolio),
+        ("Maximum Profit Portfolio", test_maximum_profit_portfolio),
         ("Fat Tail Risk", test_fat_tail_risk),
         ("Data Quality", test_data_quality),
         ("ML Predictions", test_ml_predictions),

@@ -291,7 +291,7 @@ def demo_cybersecurity_framework():
     print("   🔐 Initializing security framework...")
     token = security.initialize_security(
         grok_api_key=os.environ['GROK_API_KEY'],
-"YOUR_PASSWORD_HERE"MASTER_PASSWORD']
+        user_password=os.getenv("MASTER_PASSWORD", "secure_password")
     )
     
     if token:

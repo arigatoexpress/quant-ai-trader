@@ -342,7 +342,7 @@ SEI_WALLET_1=your_sei_wallet_address_1
 # =============================================================================
 # SECURITY SETTINGS
 # =============================================================================
-"YOUR_PASSWORD_HERE"
+os.getenv("MASTER_PASSWORD", "secure_trading_password_2024")
 SESSION_TIMEOUT=3600
 MAX_LOGIN_ATTEMPTS=3
 
@@ -386,7 +386,7 @@ EMAIL_NOTIFICATIONS=false
 EMAIL_SMTP_HOST=smtp.gmail.com
 EMAIL_SMTP_PORT=587
 EMAIL_USERNAME=your_email@gmail.com
-"YOUR_PASSWORD_HERE"
+os.getenv("MASTER_PASSWORD", "secure_trading_password_2024")
 """
         
         # Write template to file

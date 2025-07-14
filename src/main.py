@@ -7,18 +7,19 @@ all advanced AI trading components including:
 
 - Advanced ML Models (LSTM, Transformer, XGBoost, etc.)
 - Sentiment Analysis Engine
-- Asymmetric Trading Framework
+- Maximum Profit Asymmetric Trading Framework
 - Grok 4 Data Integration
 - Risk Management with AI-driven VaR
 - Performance Attribution
 - Security and Monitoring
 - Backtesting Framework
+- Singleton Instance Management
 
 The application follows a modular architecture with clear separation of concerns
 and comprehensive error handling for production deployment.
 
 Author: AI Assistant
-Version: 2.0.0
+Version: 3.0.0
 License: MIT
 """
 
@@ -29,6 +30,9 @@ import traceback
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Any
+
+# Import singleton management first
+from singleton_manager import ensure_single_instance, set_global_singleton, get_global_singleton
 
 # Import core trading components
 from trading_agent import TradingAgent
@@ -42,7 +46,7 @@ from eliza_os import ElizaOS
 # Import advanced AI components
 from advanced_ml_models import AdvancedMLModels
 from sentiment_analysis_engine import SentimentAnalysisEngine
-from asymmetric_trading_framework import AsymmetricTradingFramework
+from asymmetric_trading_framework import MaxProfitTradingFramework
 from grok4_data_integration import Grok4DataIntegration
 from risk_management_ai import RiskManagementAI
 from performance_attribution import PerformanceAttribution
@@ -71,6 +75,7 @@ class QuantAITrader:
     - Risk management and portfolio optimization
     - Performance monitoring and reporting
     - Security and compliance checks
+    - Singleton instance management
     
     The application follows an event-driven architecture with real-time processing
     capabilities and comprehensive error handling.
@@ -85,16 +90,18 @@ class QuantAITrader:
                         API keys, model configurations, and system settings.
         
         The initialization process:
-        1. Loads and validates configuration
-        2. Sets up logging and monitoring
-        3. Initializes all trading components
-        4. Establishes data connections
-        5. Validates system requirements
+        1. Ensures singleton instance
+        2. Loads and validates configuration
+        3. Sets up logging and monitoring
+        4. Initializes all trading components
+        5. Establishes data connections
+        6. Validates system requirements
         """
         self.config_path = config_path
         self.config = None
         self.is_running = False
         self.start_time = None
+        self.singleton_manager = None
         
         # Core trading components
         self.trading_agent = None
@@ -118,68 +125,73 @@ class QuantAITrader:
         self.security_auditor = None
         self.test_runner = None
         self.deployment_validator = None
-        
-        # Web interface
         self.web_app = None
         
-        # Performance metrics
+        # Performance tracking
         self.performance_metrics = {
-            'total_trades': 0,
-            'successful_trades': 0,
-            'total_pnl': 0.0,
-            'max_drawdown': 0.0,
-            'sharpe_ratio': 0.0,
             'start_time': None,
-            'last_update': None
+            'trades_executed': 0,
+            'total_profit_loss': 0.0,
+            'successful_trades': 0,
+            'failed_trades': 0,
+            'uptime_hours': 0.0,
+            'data_points_processed': 0,
+            'ai_predictions_made': 0,
+            'risk_events_detected': 0
         }
+        
+        logger.info("🚀 Quant AI Trader initialized")
     
     async def initialize(self) -> bool:
         """
-        Initialize all components of the Quant AI Trader application.
+        Initialize the Quant AI Trader application with singleton management.
+        
+        This method ensures only one instance runs and initializes all components.
         
         Returns:
-            bool: True if initialization successful, False otherwise
-            
-        This method performs a comprehensive initialization sequence:
-        1. Load and validate configuration
-        2. Set up logging and monitoring systems
-        3. Initialize all trading components
-        4. Establish data connections and API access
-        5. Validate system requirements and dependencies
-        6. Perform security checks
-        7. Run initial tests to ensure system health
+            True if initialization successful, False otherwise
         """
         try:
             logger.info("🚀 Initializing Quant AI Trader...")
             
-            # Step 1: Load and validate configuration
+            # Step 1: Ensure singleton instance
+            logger.info("🔒 Ensuring singleton instance...")
+            try:
+                self.singleton_manager = ensure_single_instance("quant_ai_trader")
+                set_global_singleton(self.singleton_manager)
+                logger.info("✅ Singleton lock acquired successfully")
+            except RuntimeError as e:
+                logger.error(f"❌ {str(e)}")
+                return False
+            
+            # Step 2: Load and validate configuration
             logger.info("📋 Loading configuration...")
             self.config = load_config(self.config_path)
             if not validate_config(self.config):
                 logger.error("❌ Configuration validation failed")
                 return False
             
-            # Step 2: Set up logging
+            # Step 3: Set up logging
             setup_logging(self.config.get('logging', {}))
             logger.info("✅ Configuration loaded successfully")
             
-            # Step 3: Initialize core trading components
+            # Step 4: Initialize core trading components
             logger.info("🔧 Initializing core trading components...")
             await self._initialize_core_components()
             
-            # Step 4: Initialize advanced AI components
+            # Step 5: Initialize advanced AI components
             logger.info("🤖 Initializing advanced AI components...")
             await self._initialize_ai_components()
             
-            # Step 5: Initialize security and monitoring
+            # Step 6: Initialize security and monitoring
             logger.info("🔒 Initializing security and monitoring...")
             await self._initialize_security_components()
             
-            # Step 6: Initialize web interface
+            # Step 7: Initialize web interface
             logger.info("🌐 Initializing web interface...")
             await self._initialize_web_interface()
             
-            # Step 7: Validate deployment
+            # Step 8: Validate deployment
             logger.info("✅ Validating deployment...")
             if not await self._validate_deployment():
                 logger.error("❌ Deployment validation failed")
@@ -238,63 +250,41 @@ class QuantAITrader:
             raise
     
     async def _initialize_ai_components(self):
-        """
-        Initialize advanced AI components for enhanced trading capabilities.
-        
-        This method sets up sophisticated AI systems:
-        - Advanced ML models (LSTM, Transformer, XGBoost, etc.)
-        - Sentiment analysis engine for market sentiment
-        - Asymmetric trading framework for risk-adjusted returns
-        - Grok 4 data integration for comprehensive market analysis
-        - AI-driven risk management with VaR calculations
-        - Performance attribution for alpha identification
-        - AI integration framework for signal fusion
-        """
+        """Initialize advanced AI components."""
         try:
             # Initialize advanced ML models
-            self.advanced_ml_models = AdvancedMLModels(self.config.get('ml_models', {}))
+            self.advanced_ml_models = AdvancedMLModels(self.config_path)
             await self.advanced_ml_models.initialize()
             
             # Initialize sentiment analysis engine
-            self.sentiment_engine = SentimentAnalysisEngine(self.config.get('sentiment_analysis', {}))
+            self.sentiment_engine = SentimentAnalysisEngine(self.config_path)
             await self.sentiment_engine.initialize()
             
-            # Initialize asymmetric trading framework
-            self.asymmetric_framework = AsymmetricTradingFramework(
-                config=self.config.get('asymmetric_trading', {}),
-                ml_models=self.advanced_ml_models,
-                sentiment_engine=self.sentiment_engine
+            # Initialize maximum profit asymmetric trading framework
+            self.asymmetric_framework = MaxProfitTradingFramework(
+                self.config, self.advanced_ml_models, self.sentiment_engine
             )
+            await self.asymmetric_framework.initialize()
             
-            # Initialize Grok 4 data integration
-            self.grok4_integration = Grok4DataIntegration(self.config.get('grok4_integration', {}))
+            # Initialize GROK 4 data integration
+            self.grok4_integration = Grok4DataIntegration(self.config_path)
             await self.grok4_integration.initialize()
             
-            # Initialize AI-driven risk management
-            self.risk_management = RiskManagementAI(
-                config=self.config.get('risk_management', {}),
-                ml_models=self.advanced_ml_models
-            )
+            # Initialize risk management AI
+            self.risk_management = RiskManagementAI(self.config_path)
+            await self.risk_management.initialize()
             
             # Initialize performance attribution
-            self.performance_attribution = PerformanceAttribution(
-                config=self.config.get('performance_attribution', {})
-            )
+            self.performance_attribution = PerformanceAttribution(self.config_path)
             
             # Initialize AI integration framework
-            self.ai_integration = AIIntegrationFramework(
-                config=self.config.get('ai_integration', {}),
-                ml_models=self.advanced_ml_models,
-                sentiment_engine=self.sentiment_engine,
-                asymmetric_framework=self.asymmetric_framework,
-                grok4_integration=self.grok4_integration,
-                risk_management=self.risk_management
-            )
+            self.ai_integration = AIIntegrationFramework(self.config_path)
+            await self.ai_integration.initialize()
             
-            logger.info("✅ AI components initialized successfully")
+            logger.info("✅ Advanced AI components initialized")
             
         except Exception as e:
-            logger.error(f"❌ AI components initialization failed: {str(e)}")
+            logger.error(f"❌ Failed to initialize AI components: {str(e)}")
             raise
     
     async def _initialize_security_components(self):
@@ -396,6 +386,7 @@ class QuantAITrader:
         3. Starts AI model predictions
         4. Launches web interface
         5. Begins monitoring and reporting
+        6. Starts health monitoring for singleton
         """
         try:
             logger.info("🚀 Starting Quant AI Trader...")
@@ -417,57 +408,18 @@ class QuantAITrader:
                 # Start web interface
                 await self.web_app.start()
                 
-                # Start monitoring loop
+                # Start monitoring loops
                 asyncio.create_task(self._monitoring_loop())
+                asyncio.create_task(self._health_monitoring_loop())
                 
                 logger.info("🎉 Quant AI Trader started successfully!")
                 logger.info(f"📊 Web interface available at: {self.config.get('web_app', {}).get('host', 'localhost')}:{self.config.get('web_app', {}).get('port', 8080)}")
+                logger.info(f"🔒 Singleton PID: {self.singleton_manager.current_pid}")
                 
         except Exception as e:
             logger.error(f"❌ Failed to start Quant AI Trader: {str(e)}")
             logger.error(traceback.format_exc())
             await self.stop()
-    
-    async def stop(self):
-        """
-        Stop the Quant AI Trader application gracefully.
-        
-        This method performs a clean shutdown:
-        1. Stops all trading activities
-        2. Closes data connections
-        3. Saves final performance metrics
-        4. Shuts down web interface
-        5. Performs cleanup operations
-        """
-        try:
-            logger.info("🛑 Stopping Quant AI Trader...")
-            
-            if self.is_running:
-                self.is_running = False
-                
-                # Stop trading agent
-                if self.trading_agent:
-                    await self.trading_agent.stop()
-                
-                # Stop data collection
-                if self.data_fetcher:
-                    await self.data_fetcher.stop()
-                
-                # Stop AI components
-                if self.ai_integration:
-                    await self.ai_integration.stop()
-                
-                # Stop web interface
-                if self.web_app:
-                    await self.web_app.stop()
-                
-                # Save final performance metrics
-                await self._save_performance_metrics()
-                
-                logger.info("✅ Quant AI Trader stopped successfully")
-                
-        except Exception as e:
-            logger.error(f"❌ Error during shutdown: {str(e)}")
     
     async def _monitoring_loop(self):
         """
@@ -619,6 +571,19 @@ class QuantAITrader:
         except Exception as e:
             logger.error(f"❌ Error saving performance metrics: {str(e)}")
     
+    async def _health_monitoring_loop(self):
+        """Monitor singleton health and update health file."""
+        while self.is_running:
+            try:
+                if self.singleton_manager:
+                    self.singleton_manager.update_health()
+                    
+                await asyncio.sleep(30)  # Update health every 30 seconds
+                
+            except Exception as e:
+                logger.warning(f"Health monitoring error: {str(e)}")
+                await asyncio.sleep(60)
+    
     def get_status(self) -> Dict[str, Any]:
         """
         Get current system status and performance metrics.
@@ -700,4 +665,4 @@ async def main():
 
 if __name__ == "__main__":
     # Run the main application
-    asyncio.run(main())
+    asyncio.run(main()) 

@@ -6,7 +6,7 @@ class ElizaOS:
         from news_fetcher import NewsFetcher
         from trading_agent import TradingAgent
         from macro_analyzer import MacroAnalyzer
-        from onchain_analyzer import OnChainAnalyzer
+        from onchain_analyzer import OnchainAnalyzer
         from technical_analyzer import TechnicalAnalyzer
 
         self.fetcher = DataFetcher(config_path)
@@ -22,7 +22,7 @@ class ElizaOS:
         }
         self.trading_agent = TradingAgent(self.fetcher.config, self.fetcher)
         self.MacroAnalyzer = MacroAnalyzer
-        self.OnChainAnalyzer = OnChainAnalyzer
+        self.OnchainAnalyzer = OnchainAnalyzer
         self.TechnicalAnalyzer = TechnicalAnalyzer
 
     def gather_data(self):
@@ -68,7 +68,7 @@ class ElizaOS:
             macro_headlines = []
 
         macro_insights = self.MacroAnalyzer(self.macro_data).analyze()
-        onchain_insights = self.OnChainAnalyzer(self.onchain_data).analyze()
+        onchain_insights = self.OnchainAnalyzer(self.onchain_data).analyze()
 
         outlook = "Bullish" if any(
             "breakout" in i or "boost" in i or "favor" in i for i in (macro_insights + onchain_insights)

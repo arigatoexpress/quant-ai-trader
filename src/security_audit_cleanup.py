@@ -86,7 +86,7 @@ class SecretScanner:
                 pattern=r'(?i)(password|passwd|pwd)\s*[:=]\s*["\']?([a-zA-Z0-9@#$%^&*()_+-=]{8,})["\']?',
                 description="Plain text passwords",
                 severity="HIGH",
-"secure_password"]
+                examples=["password: secure_password"]
             ),
             SecretPattern(
                 name="JWT Tokens",
@@ -469,7 +469,7 @@ class SecurityCleanup:
                         elif 'password' in original_line.lower():
                             new_line = original_line.replace(
                                 re.search(r'["\']?[^"\']+["\']?', original_line).group(),
-                                '"YOUR_PASSWORD_HERE"'
+                                os.getenv("AUDIT_PASSWORD", "audit_password")
                             )
                         else:
                             new_line = original_line.replace(
