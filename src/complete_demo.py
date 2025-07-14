@@ -10,8 +10,10 @@ from datetime import datetime
 from typing import Dict, Any
 
 # Set GROK API key for demo
-os.environ['GROK_API_KEY'] = 'SECRET_REMOVED'
-os.environ['MASTER_PASSWORD'] = 'secure_trading_password_2024'
+# API key should be set in environment variables
+# os.environ['GROK_API_KEY'] = 'your_api_key_here'
+# ⚠️ SECURITY: Set MASTER_PASSWORD in your .env file instead
+# os.environ['MASTER_PASSWORD'] = 'secure_trading_password_2024'
 
 try:
     from enhanced_trading_application import EnhancedTradingApplication

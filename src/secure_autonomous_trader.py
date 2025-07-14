@@ -682,7 +682,7 @@ def main():
     
     # Initialize secure trading
     success = secure_system.initialize_secure_trading(
-        grok_api_key="SECRET_REMOVED",
+        grok_api_key=os.getenv("GROK_API_KEY", "your_api_key_here"),
         user_password="secure_password"
     )
     

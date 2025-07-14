@@ -11,5 +11,5 @@ assets:
 data_urls: {}
 
 sui_rpc: https://fullnode.mainnet.sui.io
-grok_api_key: "SECRET_REMOVED"
+grok_api_key: ${GROK_API_KEY}
 mcp_port: 8000

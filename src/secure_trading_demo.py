@@ -5,6 +5,7 @@ Showcases all security features and autonomous trading capabilities
 
 import time
 import json
+import os
 from datetime import datetime, timedelta
 from typing import Dict, List, Any
 
@@ -270,7 +271,7 @@ def demonstrate_complete_system():
     # Initialize with demo credentials
     print("🔐 Initializing secure trading system...")
     success = secure_system.initialize_secure_trading(
-        grok_api_key="SECRET_REMOVED",
+        grok_api_key=os.getenv("GROK_API_KEY", "your_api_key_here"),
         user_password="secure_password"
     )
     

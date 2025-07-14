@@ -118,21 +118,21 @@ self.analysis_interval = 1800  # 30 minutes (in seconds)
 ## Your Wallet Addresses
 
 ### SUI Wallets (11 total)
-- `0x2401cdd7771bd1d45050eb086c5a2793a2799cb5864f32afdc2badcf44b45563`
-- `0x57b78bf1502af2c0b94801dfb3f4e8ec189b0404915314bb011d867115757179`
-- `0x7498668ffe15c4aca457787a8ec4aa56c4973890f1c6921d330550dc8f26fbdb`
-- `0x40447f2412efdf5a5dd32c77cb5c6ff6b4d46a19599b7cc520878a33a6edb3ba`
-- `0x4cbbd223b85f3346bb77b0076a15b4af3f7faf54ab8ff815a571877c9b44bbfa`
-- `0x5b54fbf8f54103982097c0bec1c40f9292326d963ca51a01b54b82740309e594`
-- `0x9eba9b4f76732dcc70875fba7fbb7949c9329afebe9c5cc71ba1640ec7fd1bbc`
-- `0x1ee3f6f78eef9c51b613fcca46bbcfab6cc22a9bc1cd89296055d7b8ef986fdb`
-- `0x18a30a4878761bfdfed20646e5b6366f451121f7fb2c7f7f6fcbde8efe739a82`
-- `0x0286e661e867e766c390a88e38d80dcd426059efbafcc41796c3f2a1e540cc67`
-- `0xf92cf979a898d0e6aba1a0eae3906fd66fdb6ed49a76d349d8cf0e2431901ae5`
+- Set `SUI_WALLET_1=0x_your_sui_wallet_address_here` in .env file
+- `0x_configure_your_wallet_address_in_env_file`
+- `0x_configure_your_wallet_address_in_env_file`
+- `0x_configure_your_wallet_address_in_env_file`
+- `0x_configure_your_wallet_address_in_env_file`
+- `0x_configure_your_wallet_address_in_env_file`
+- `0x_configure_your_wallet_address_in_env_file`
+- `0x_configure_your_wallet_address_in_env_file`
+- `0x_configure_your_wallet_address_in_env_file`
+- `0x_configure_your_wallet_address_in_env_file`
+- `0x_configure_your_wallet_address_in_env_file`
 
 ### Solana Wallets (2 total)
-- `DX3wsNdaCw3PK3BWxPG7HdijzKKLAnSXDCJRVu8z74t2`
-- `BqyvPBrPHvJ1VHz11m5WYUwqzZg3QnmvzzY1a9BnYbFw`
+- `configure_your_solana_wallet_address_in_env_file`
+- `configure_your_solana_wallet_address_in_env_file`
 
 ### Ethereum Wallet
 - `0xc42E2eB90528291Bd0c68956302BB7e48E578827`

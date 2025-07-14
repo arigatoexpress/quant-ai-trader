@@ -367,7 +367,7 @@ os.getenv("TEST_PASSWORD", "test_password")
     assert is_clean, f"Clean code should pass validation, found secrets: {secrets}"
     # Test with hardcoded secrets
     dirty_code = """
-    api_key = "SECRET_REMOVED"
+    api_key = os.getenv("GROK_API_KEY", "your_api_key_here")
 "secure_password"
     """
     is_clean, secrets = validate_secrets_in_code(dirty_code)

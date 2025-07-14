@@ -1,49 +1,101 @@
-# Core Trading and Data Analysis
+# ============================================================================
+# QUANT AI TRADER - DEPENDENCIES
+# ============================================================================
+# For production deployment, pin specific versions for stability
+# For development, use >= for flexibility
+
+# ============================================================================
+# CORE TRADING AND DATA ANALYSIS
+# ============================================================================
 pandas>=2.0.0
 numpy>=1.24.0
 scikit-learn>=1.3.0
-yfinance>=0.2.12
-ccxt>=4.0.0
 requests>=2.31.0
 aiohttp>=3.8.0
 asyncio-throttle>=1.0.2
 
-# Free Data Sources
-tvdatafeed>=2.0.0  # TradingView free integration
-beautifulsoup4>=4.12.0  # Web scraping for additional data
-lxml>=4.9.0  # XML parsing support
+# ============================================================================
+# FREE DATA SOURCES (No API key required)
+# ============================================================================
+yfinance>=0.2.12
+ccxt>=4.0.0
+tvdatafeed>=2.0.0  # TradingView integration
+beautifulsoup4>=4.12.0  # Web scraping
+lxml>=4.9.0  # XML parsing
 
-# Machine Learning and AI
+# ============================================================================
+# AI AND MACHINE LEARNING
+# ============================================================================
+openai>=1.0.0  # For Grok/OpenAI API
 torch>=2.0.0
 transformers>=4.30.0
 xgboost>=1.7.0
 tensorflow>=2.13.0
-openai>=1.0.0
 
-# Technical Analysis
+# ============================================================================
+# TECHNICAL ANALYSIS
+# ============================================================================
 ta>=0.10.2
 TA-Lib>=0.4.25
 mplfinance>=0.12.9b7
 
-# Web Framework and Dashboard
+# ============================================================================
+# WEB FRAMEWORK AND DASHBOARD
+# ============================================================================
 streamlit>=1.28.0
 plotly>=5.15.0
 fastapi>=0.100.0
 uvicorn>=0.23.0
+flask>=2.3.0
 
-# Security and Authentication
+# ============================================================================
+# SECURITY AND AUTHENTICATION
+# ============================================================================
 bcrypt>=4.0.0
 cryptography>=41.0.0
 pyjwt>=2.8.0
 pyotp>=2.9.0
 qrcode>=7.4.2
 
-# Database
+# ============================================================================
+# DATABASE
+# ============================================================================
 sqlalchemy>=2.0.0
-sqlite3  # Built into Python
-psycopg2-binary>=2.9.0
+# sqlite3 is built into Python
+psycopg2-binary>=2.9.0  # Optional PostgreSQL support
 
-# Google Cloud (Optional)
+# ============================================================================
+# PREMIUM DATA SOURCES (Optional)
+# ============================================================================
+alpha-vantage>=2.3.1  # Free tier available
+polygon-api-client>=1.12.0  # Free tier available
+twelvedata>=1.2.14  # Free tier available
+
+# ============================================================================
+# UTILITIES AND CONFIGURATION
+# ============================================================================
+pyyaml>=6.0
+python-dotenv>=1.0.0
+certifi>=2023.7.22
+websocket-client>=1.6.0
+
+# ============================================================================
+# NOTIFICATIONS (Optional)
+# ============================================================================
+python-telegram-bot>=20.0
+
+# ============================================================================
+# MONITORING AND CACHING
+# ============================================================================
+prometheus-client>=0.17.0
+redis>=4.6.0  # Optional caching
+diskcache>=5.6.0  # Local caching
+schedule>=1.2.0
+psutil>=5.9.0
+
+# ============================================================================
+# CLOUD DEPLOYMENT (Optional)
+# ============================================================================
 google-cloud-storage>=2.10.0
 google-cloud-monitoring>=2.15.0
 google-cloud-logging>=3.6.0
@@ -51,42 +103,33 @@ google-cloud-compute>=1.14.0
 google-cloud-sql>=3.5.0
 google-cloud-secret-manager>=2.16.0
 
-# Development and Testing
+# ============================================================================
+# DEVELOPMENT AND TESTING
+# ============================================================================
 pytest>=7.4.0
 pytest-asyncio>=0.21.0
 black>=23.7.0
 flake8>=6.0.0
 
-# Utilities
-pyyaml>=6.0
-python-dotenv>=1.0.0
-certifi>=2023.7.22
-ssl-context>=1.0.0
-websocket-client>=1.6.0
-python-telegram-bot>=20.0
-
-# Monitoring and Logging
-prometheus-client>=0.17.0
-grafana-api>=1.0.3
-
-# Additional Free Data Sources
-alpha-vantage>=2.3.1  # Free tier available
-polygon-api-client>=1.12.0  # Free tier available
-twelvedata>=1.2.14  # Free tier available
-
-# Data Storage and Caching
-redis>=4.6.0
-diskcache>=5.6.0
-
-# Networking and SSL
-ssl>=0.0.0
-threading>=0.0.0
-
-# Optional TradingView Premium Support
-# Uncomment if you have TradingView premium:
-# tradingview-ta>=3.3.0
-
-# Backup and Monitoring (Optional)
-schedule>=1.2.0
-psutil>=5.9.0
+# ============================================================================
+# NOTES
+# ============================================================================
+# 1. For minimal installation (free tier only):
+#    pip install -r requirements.txt --no-deps
+#    Then manually install: pandas numpy requests aiohttp openai streamlit
+#
+# 2. For full installation:
+#    pip install -r requirements.txt
+#
+# 3. Some packages like TA-Lib may require system dependencies:
+#    - macOS: brew install ta-lib
+#    - Ubuntu: sudo apt-get install libta-lib-dev
+#    - Windows: Download from https://www.lfd.uci.edu/~gohlke/pythonlibs/
+#
+# 4. TensorFlow and PyTorch are large packages (>1GB each)
+#    Consider installing only if you need advanced ML features
+#
+# 5. Cloud packages are only needed for Google Cloud deployment
+#
+# ============================================================================
 
