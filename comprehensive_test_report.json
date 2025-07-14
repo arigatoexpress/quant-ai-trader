@@ -1,0 +1,14 @@
+{
+  "timestamp": "2025-07-13T22:41:10.348600",
+  "summary": {
+    "total_tests": 14,
+    "passed": 7,
+    "failed": 7,
+    "errors": 0,
+    "success_rate": 50.0,
+    "total_duration": 1.0,
+    "avg_duration": 0.072
+  },
+  "suite_results": {
+    "Data Integration": [
+      

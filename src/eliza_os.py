@@ -2,12 +2,12 @@ class ElizaOS:
     """Orchestrate data gathering and provide actionable insights."""
 
     def __init__(self, config_path=None, macro_data=None, onchain_data=None):
-        from .data_fetcher import DataFetcher
-        from .news_fetcher import NewsFetcher
-        from .trading_agent import TradingAgent
-        from .macro_analyzer import MacroAnalyzer
-        from .onchain_analyzer import OnChainAnalyzer
-        from .technical_analyzer import TechnicalAnalyzer
+        from data_fetcher import DataFetcher
+        from news_fetcher import NewsFetcher
+        from trading_agent import TradingAgent
+        from macro_analyzer import MacroAnalyzer
+        from onchain_analyzer import OnChainAnalyzer
+        from technical_analyzer import TechnicalAnalyzer
 
         self.fetcher = DataFetcher(config_path)
         self.news_fetcher = NewsFetcher()

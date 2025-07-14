@@ -25,4 +25,20 @@ env/
 *.pyo
 *.pyd
 *.sqlite3
-*.db
+*.db# Security - Sensitive Files
+.env
+.env.local
+.env.production
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+keys/
+credentials/
+.pytest_cache/
+.coverage
+htmlcov/
+.DS_Store
+Thumbs.db
+backup_20250713_*/

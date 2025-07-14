@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.linear_model import LinearRegression
-from .utils import calculate_momentum, calculate_risk_reward
+from utils import calculate_momentum, calculate_risk_reward
 
 class TradingAgent:
     def __init__(self, config, data_fetcher):

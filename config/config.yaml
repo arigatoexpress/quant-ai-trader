@@ -8,6 +8,8 @@ assets:
   - SOL
   - SUI
   - SEI
-data_urls:
-  BTC:
-    raw: https://raw.githubusercontent.com/Zombie-3000/Bitfinex-historical-data/master/BTCUSD/Candles_1m/2013/merged.csv
+data_urls: {}
+
+sui_rpc: https://fullnode.mainnet.sui.io
+grok_api_key: "SECRET_REMOVED"
+mcp_port: 8000

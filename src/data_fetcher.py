@@ -54,13 +54,30 @@ class DataFetcher:
 
     def _generate_synthetic_data(self, asset, timeframe):
         """Create deterministic synthetic prices for offline fallback."""
+        # Use realistic starting prices based on actual market data
+        realistic_prices = {
+            "BTC": 118000,
+            "SOL": 161,
+            "SUI": 3.48,
+            "SEI": 0.32,
+            "ETH": 3800,
+            "USDT": 1.0,
+            "USDC": 1.0,
+        }
+        
         lookback = self.config["data"].get("lookback_period", 30)
         freq = "1D" if timeframe == "1d" else "1h"
         end = datetime.utcnow()
         rng = pd.date_range(end=end, periods=lookback, freq=freq)
         seed = abs(hash(f"{asset}_{timeframe}")) % (2**32)
         rs = np.random.RandomState(seed)
-        prices = 100 + rs.randn(len(rng)).cumsum()
+        
+        # Start from realistic price for the asset
+        base_price = realistic_prices.get(asset, 100)
+        # Generate small random changes (±5% max) instead of cumulative random walk
+        price_changes = rs.uniform(-0.05, 0.05, len(rng)) * base_price
+        prices = base_price + price_changes.cumsum() * 0.1  # Dampen volatility
+        
         return pd.DataFrame({"price": prices}, index=rng)
 
     def _fetch_from_data_url(self, asset, timeframe):

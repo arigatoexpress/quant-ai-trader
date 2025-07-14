@@ -1,4 +1,4 @@
-class OnChainAnalyzer:
+class OnchainAnalyzer:
     def __init__(self, onchain_data):
         self.onchain_data = onchain_data
 

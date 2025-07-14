@@ -2,5 +2,5 @@
 
 __all__ = ["TechnicalAnalyzer", "ElizaOS"]
 
-from .eliza_os import ElizaOS
+from eliza_os import ElizaOS
 

@@ -1,11 +1,11 @@
 from flask import Flask, render_template_string
 
-from .data_fetcher import DataFetcher
-from .macro_analyzer import MacroAnalyzer
-from .onchain_analyzer import OnChainAnalyzer
-from .trading_agent import TradingAgent
-from .news_fetcher import NewsFetcher
-from .technical_analyzer import TechnicalAnalyzer
+from data_fetcher import DataFetcher
+from macro_analyzer import MacroAnalyzer
+from onchain_analyzer import OnChainAnalyzer
+from trading_agent import TradingAgent
+from news_fetcher import NewsFetcher
+from technical_analyzer import TechnicalAnalyzer
 
 app = Flask(__name__)
 fetcher = DataFetcher()

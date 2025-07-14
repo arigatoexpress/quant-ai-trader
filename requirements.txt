@@ -1,11 +1,31 @@
-pandas
-numpy
-requests
+pandas==2.2.0
+numpy==1.26.0
+requests==2.31.0
 ccxt
 pycoingecko
-pyyaml
-scikit-learn
+pyyaml==6.0.1
+scikit-learn==1.4.0
 python-binance
 yfinance
-Flask
+Flask==3.0.0
+mcp
+openai==1.35.0
+matplotlib==3.8.0
+seaborn==0.13.0
+scipy==1.12.0
+plotly==5.17.0
+dash==2.15.0
+dash-bootstrap-components==1.5.0
+python-dotenv==1.0.0
+kaleido==0.2.1
+
+# Security dependencies
+cryptography==41.0.7
+bcrypt==4.0.1
+pycryptodome==3.19.0
+
+# Additional dependencies for enhanced features
+scikit-learn==1.4.0
+pandas==2.2.0
+numpy==1.26.0
 

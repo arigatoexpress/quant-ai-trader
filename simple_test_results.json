@@ -1,0 +1,62 @@
+[
+  {
+    "test_name": "Data Structures",
+    "status": "PASS",
+    "duration": 0.011614,
+    "error": null
+  },
+  {
+    "test_name": "Asymmetric Calculations",
+    "status": "PASS",
+    "duration": 4.1e-05,
+    "error": null
+  },
+  {
+    "test_name": "Barbell Portfolio",
+    "status": "FAIL",
+    "duration": 1.5e-05,
+    "error": "Risky ratio should be between 0.2 and 0.25 (inclusive)"
+  },
+  {
+    "test_name": "Fat Tail Risk",
+    "status": "PASS",
+    "duration": 0.001432,
+    "error": null
+  },
+  {
+    "test_name": "Data Quality",
+    "status": "PASS",
+    "duration": 0.002744,
+    "error": null
+  },
+  {
+    "test_name": "ML Predictions",
+    "status": "PASS",
+    "duration": 0.004429,
+    "error": null
+  },
+  {
+    "test_name": "Sentiment Analysis",
+    "status": "PASS",
+    "duration": 3.2e-05,
+    "error": null
+  },
+  {
+    "test_name": "Backtesting",
+    "status": "PASS",
+    "duration": 0.004362,
+    "error": null
+  },
+  {
+    "test_name": "Security Validation",
+    "status": "PASS",
+    "duration": 0.000546,
+    "error": null
+  },
+  {
+    "test_name": "Performance Metrics",
+    "status": "PASS",
+    "duration": 0.000124,
+    "error": null
+  }
+]
