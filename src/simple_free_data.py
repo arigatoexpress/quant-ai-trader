@@ -256,8 +256,41 @@ class SimpleFreeDataSources:
         
         return results
     
-    # Mock yield opportunities (since we can't access premium DeFi APIs)
-    def get_mock_yield_opportunities(self) -> List[YieldData]:
+    # Real DeFi Llama yield opportunities (instead of mock data)
+    async def get_defillama_yield_opportunities(self) -> List[YieldData]:
+        """Get real yield opportunities from DeFi Llama free API"""
+        try:
+            from defillama_integration import DeFiLlamaAPI
+            
+            async with DeFiLlamaAPI() as defillama:
+                pools = await defillama.get_high_yield_opportunities(
+                    min_apy=10,  # 10%+ APY
+                    min_tvl=100000,  # $100k+ TVL
+                    max_il_risk='medium'
+                )
+                
+                opportunities = []
+                for pool in pools[:10]:  # Top 10 opportunities
+                    opportunities.append(YieldData(
+                        protocol=pool.project,
+                        pool_name=f"{pool.symbol} Pool",
+                        apy=pool.apy,
+                        tvl=pool.tvlUsd,
+                        tokens=pool.underlyingTokens or [pool.symbol],
+                        chain=pool.chain
+                    ))
+                
+                logger.info(f"✅ Retrieved {len(opportunities)} real DeFi opportunities from DeFi Llama")
+                return opportunities
+                
+                 except ImportError:
+            logger.warning("DeFi Llama integration not available, using mock data")
+            return self._get_mock_yield_opportunities()
+        except Exception as e:
+            logger.error(f"DeFi Llama API error: {e}, falling back to mock data")
+            return self._get_mock_yield_opportunities()
+    
+    def _get_mock_yield_opportunities(self) -> List[YieldData]:
         """Generate mock yield opportunities for demonstration"""
         protocols = [
             {'name': 'Uniswap V3', 'chain': 'ethereum', 'base_apy': 15},
@@ -296,7 +329,7 @@ class SimpleFreeDataSources:
         dex_data = await self.get_dexscreener_trending()
         yahoo_data = self.get_yahoo_finance_data(symbols)
         exchange_data = await self.get_exchange_prices(symbols)
-        yield_data = self.get_mock_yield_opportunities()
+        yield_data = await self.get_defillama_yield_opportunities() # Changed to get_defillama_yield_opportunities
         
         # Cross-validate prices
         price_consensus = self._get_price_consensus(symbols, coingecko_data, yahoo_data, exchange_data)
