@@ -1,667 +1,473 @@
+#!/usr/bin/env python3
 """
-Quant AI Trader - Main Application Entry Point
-==============================================
-
-This is the main entry point for the Quant AI Trader application, which integrates
-all advanced AI trading components including:
-
-- Advanced ML Models (LSTM, Transformer, XGBoost, etc.)
-- Sentiment Analysis Engine
-- Maximum Profit Asymmetric Trading Framework
-- Grok 4 Data Integration
-- Risk Management with AI-driven VaR
-- Performance Attribution
-- Security and Monitoring
-- Backtesting Framework
-- Singleton Instance Management
-
-The application follows a modular architecture with clear separation of concerns
-and comprehensive error handling for production deployment.
-
-Author: AI Assistant
-Version: 3.0.0
-License: MIT
+Quant AI Trader - Main Application
+Enterprise-grade AI-powered trading system with free data sources integration
 """
 
 import asyncio
 import logging
 import sys
-import traceback
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Optional, Any
+import os
+from datetime import datetime
+from typing import Dict, Any, Optional
+import json
 
-# Import singleton management first
-from singleton_manager import ensure_single_instance, set_global_singleton, get_global_singleton
+# Add src to path for local imports
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# Import core trading components
-from trading_agent import TradingAgent
+# Core imports
 from data_fetcher import DataFetcher
+from trading_agent import TradingAgent
 from technical_analyzer import TechnicalAnalyzer
-from macro_analyzer import MacroAnalyzer
-from news_fetcher import NewsFetcher
-from onchain_analyzer import OnchainAnalyzer
-from eliza_os import ElizaOS
-
-# Import advanced AI components
-from advanced_ml_models import AdvancedMLModels
 from sentiment_analysis_engine import SentimentAnalysisEngine
-from asymmetric_trading_framework import MaxProfitTradingFramework
-from grok4_data_integration import Grok4DataIntegration
 from risk_management_ai import RiskManagementAI
-from performance_attribution import PerformanceAttribution
-from ai_integration_framework import AIIntegrationFramework
+from portfolio_analyzer import PortfolioAnalyzer
 
-# Import security and monitoring components
-from security_audit_cleanup import SecurityAuditor
-from comprehensive_testing_framework import ComprehensiveTestRunner
-from deployment_validation import DeploymentValidator
+# Free data sources integration
+try:
+    from free_data_sources import FreeDataSources, get_free_market_data
+    FREE_DATA_AVAILABLE = True
+except ImportError:
+    FREE_DATA_AVAILABLE = False
+    print("⚠️ Free data sources not available. Run: pip install -r requirements.txt")
 
-# Import utility components
-from utils import setup_logging, load_config, validate_config
-from web_app import WebApp
+# Enhanced systems
+try:
+    from singleton_manager import SingletonManager, SingletonError
+    SINGLETON_AVAILABLE = True
+except ImportError:
+    SINGLETON_AVAILABLE = False
+    print("⚠️ Singleton manager not available")
 
-# Configure logging for the main application
+try:
+    from secure_authentication import SecureAuthenticationSystem
+    SECURE_AUTH_AVAILABLE = True
+except ImportError:
+    SECURE_AUTH_AVAILABLE = False
+    print("⚠️ Secure authentication not available")
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('quant_trader.log'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
 logger = logging.getLogger(__name__)
 
 class QuantAITrader:
     """
-    Main Quant AI Trader application class that orchestrates all trading components.
-    
-    This class serves as the central coordinator for:
-    - Data collection and processing
-    - AI model predictions and analysis
-    - Trading signal generation and execution
-    - Risk management and portfolio optimization
-    - Performance monitoring and reporting
-    - Security and compliance checks
-    - Singleton instance management
-    
-    The application follows an event-driven architecture with real-time processing
-    capabilities and comprehensive error handling.
+    Enterprise-grade AI-powered trading system with free data sources
     """
     
-    def __init__(self, config_path: str = "config/config.yaml"):
+    def __init__(self, config: Dict[str, Any] = None, use_free_data: bool = True):
         """
-        Initialize the Quant AI Trader application.
+        Initialize the Quant AI Trader system
         
         Args:
-            config_path: Path to the configuration file containing all trading parameters,
-                        API keys, model configurations, and system settings.
-        
-        The initialization process:
-        1. Ensures singleton instance
-        2. Loads and validates configuration
-        3. Sets up logging and monitoring
-        4. Initializes all trading components
-        5. Establishes data connections
-        6. Validates system requirements
+            config: Configuration dictionary
+            use_free_data: Whether to use free data sources (default: True)
         """
-        self.config_path = config_path
-        self.config = None
-        self.is_running = False
-        self.start_time = None
-        self.singleton_manager = None
+        self.config = config or self._load_default_config()
+        self.use_free_data = use_free_data
+        self.running = False
         
-        # Core trading components
-        self.trading_agent = None
+        # Initialize components
         self.data_fetcher = None
+        self.free_data_sources = None
+        self.trading_agent = None
         self.technical_analyzer = None
-        self.macro_analyzer = None
-        self.news_fetcher = None
-        self.onchain_analyzer = None
-        self.eliza_os = None
+        self.sentiment_analyzer = None
+        self.risk_manager = None
+        self.portfolio_analyzer = None
         
-        # Advanced AI components
-        self.advanced_ml_models = None
-        self.sentiment_engine = None
-        self.asymmetric_framework = None
-        self.grok4_integration = None
-        self.risk_management = None
-        self.performance_attribution = None
-        self.ai_integration = None
+        # Security and singleton management
+        self.singleton_manager = None
+        self.auth_system = None
         
-        # Security and monitoring
-        self.security_auditor = None
-        self.test_runner = None
-        self.deployment_validator = None
-        self.web_app = None
-        
-        # Performance tracking
-        self.performance_metrics = {
-            'start_time': None,
-            'trades_executed': 0,
-            'total_profit_loss': 0.0,
-            'successful_trades': 0,
-            'failed_trades': 0,
-            'uptime_hours': 0.0,
-            'data_points_processed': 0,
-            'ai_predictions_made': 0,
-            'risk_events_detected': 0
-        }
+        # Data cache
+        self.market_data_cache = {}
+        self.last_update = None
         
         logger.info("🚀 Quant AI Trader initialized")
+        logger.info(f"   Free data mode: {use_free_data}")
+        logger.info(f"   TradingView integration: {self._check_tradingview_available()}")
     
-    async def initialize(self) -> bool:
-        """
-        Initialize the Quant AI Trader application with singleton management.
-        
-        This method ensures only one instance runs and initializes all components.
-        
-        Returns:
-            True if initialization successful, False otherwise
-        """
-        try:
-            logger.info("🚀 Initializing Quant AI Trader...")
-            
-            # Step 1: Ensure singleton instance
-            logger.info("🔒 Ensuring singleton instance...")
-            try:
-                self.singleton_manager = ensure_single_instance("quant_ai_trader")
-                set_global_singleton(self.singleton_manager)
-                logger.info("✅ Singleton lock acquired successfully")
-            except RuntimeError as e:
-                logger.error(f"❌ {str(e)}")
-                return False
-            
-            # Step 2: Load and validate configuration
-            logger.info("📋 Loading configuration...")
-            self.config = load_config(self.config_path)
-            if not validate_config(self.config):
-                logger.error("❌ Configuration validation failed")
-                return False
-            
-            # Step 3: Set up logging
-            setup_logging(self.config.get('logging', {}))
-            logger.info("✅ Configuration loaded successfully")
-            
-            # Step 4: Initialize core trading components
-            logger.info("🔧 Initializing core trading components...")
-            await self._initialize_core_components()
-            
-            # Step 5: Initialize advanced AI components
-            logger.info("🤖 Initializing advanced AI components...")
-            await self._initialize_ai_components()
-            
-            # Step 6: Initialize security and monitoring
-            logger.info("🔒 Initializing security and monitoring...")
-            await self._initialize_security_components()
-            
-            # Step 7: Initialize web interface
-            logger.info("🌐 Initializing web interface...")
-            await self._initialize_web_interface()
-            
-            # Step 8: Validate deployment
-            logger.info("✅ Validating deployment...")
-            if not await self._validate_deployment():
-                logger.error("❌ Deployment validation failed")
-                return False
-            
-            logger.info("🎉 Quant AI Trader initialized successfully!")
-            return True
-            
-        except Exception as e:
-            logger.error(f"❌ Initialization failed: {str(e)}")
-            logger.error(traceback.format_exc())
-            return False
-    
-    async def _initialize_core_components(self):
-        """
-        Initialize core trading components including data fetchers, analyzers, and trading agent.
-        
-        This method sets up the fundamental trading infrastructure:
-        - Data collection from multiple sources (market data, news, onchain data)
-        - Technical and fundamental analysis engines
-        - Trading agent for signal generation and execution
-        - Eliza OS for system orchestration
-        """
-        try:
-            # Initialize data fetcher for market data collection
-            self.data_fetcher = DataFetcher(self.config.get('data_sources', {}))
-            await self.data_fetcher.initialize()
-            
-            # Initialize technical analyzer for price pattern recognition
-            self.technical_analyzer = TechnicalAnalyzer(self.config.get('technical_analysis', {}))
-            
-            # Initialize macro analyzer for fundamental analysis
-            self.macro_analyzer = MacroAnalyzer(self.config.get('macro_analysis', {}))
-            
-            # Initialize news fetcher for sentiment data
-            self.news_fetcher = NewsFetcher(self.config.get('news_sources', {}))
-            
-            # Initialize onchain analyzer for blockchain data
-            self.onchain_analyzer = OnchainAnalyzer(self.config.get('onchain_analysis', {}))
-            
-            # Initialize trading agent for signal generation and execution
-            self.trading_agent = TradingAgent(
-                config=self.config.get('trading', {}),
-                data_fetcher=self.data_fetcher,
-                technical_analyzer=self.technical_analyzer,
-                macro_analyzer=self.macro_analyzer
-            )
-            
-            # Initialize Eliza OS for system orchestration
-            self.eliza_os = ElizaOS(self.config.get('eliza_os', {}))
-            
-            logger.info("✅ Core components initialized successfully")
-            
-        except Exception as e:
-            logger.error(f"❌ Core components initialization failed: {str(e)}")
-            raise
-    
-    async def _initialize_ai_components(self):
-        """Initialize advanced AI components."""
-        try:
-            # Initialize advanced ML models
-            self.advanced_ml_models = AdvancedMLModels(self.config_path)
-            await self.advanced_ml_models.initialize()
-            
-            # Initialize sentiment analysis engine
-            self.sentiment_engine = SentimentAnalysisEngine(self.config_path)
-            await self.sentiment_engine.initialize()
-            
-            # Initialize maximum profit asymmetric trading framework
-            self.asymmetric_framework = MaxProfitTradingFramework(
-                self.config, self.advanced_ml_models, self.sentiment_engine
-            )
-            await self.asymmetric_framework.initialize()
-            
-            # Initialize GROK 4 data integration
-            self.grok4_integration = Grok4DataIntegration(self.config_path)
-            await self.grok4_integration.initialize()
-            
-            # Initialize risk management AI
-            self.risk_management = RiskManagementAI(self.config_path)
-            await self.risk_management.initialize()
-            
-            # Initialize performance attribution
-            self.performance_attribution = PerformanceAttribution(self.config_path)
-            
-            # Initialize AI integration framework
-            self.ai_integration = AIIntegrationFramework(self.config_path)
-            await self.ai_integration.initialize()
-            
-            logger.info("✅ Advanced AI components initialized")
-            
-        except Exception as e:
-            logger.error(f"❌ Failed to initialize AI components: {str(e)}")
-            raise
-    
-    async def _initialize_security_components(self):
-        """
-        Initialize security and monitoring components for system protection.
-        
-        This method sets up comprehensive security measures:
-        - Security auditor for continuous monitoring
-        - Comprehensive testing framework for system validation
-        - Deployment validator for environment checks
-        """
-        try:
-            # Initialize security auditor
-            self.security_auditor = SecurityAuditor(".")
-            
-            # Initialize comprehensive testing framework
-            self.test_runner = ComprehensiveTestRunner()
-            
-            # Initialize deployment validator
-            self.deployment_validator = DeploymentValidator(self.config)
-            
-            logger.info("✅ Security components initialized successfully")
-            
-        except Exception as e:
-            logger.error(f"❌ Security components initialization failed: {str(e)}")
-            raise
-    
-    async def _initialize_web_interface(self):
-        """
-        Initialize web interface for monitoring and control.
-        
-        This method sets up the web dashboard for:
-        - Real-time trading performance monitoring
-        - Portfolio visualization and analysis
-        - System status and health checks
-        - Manual trading controls and overrides
-        """
-        try:
-            self.web_app = WebApp(
-                config=self.config.get('web_app', {}),
-                trading_agent=self.trading_agent,
-                performance_metrics=self.performance_metrics
-            )
-            await self.web_app.initialize()
-            
-            logger.info("✅ Web interface initialized successfully")
-            
-        except Exception as e:
-            logger.error(f"❌ Web interface initialization failed: {str(e)}")
-            raise
-    
-    async def _validate_deployment(self) -> bool:
-        """
-        Validate the deployment environment and system requirements.
-        
-        Returns:
-            bool: True if deployment is valid, False otherwise
-            
-        This method performs comprehensive validation:
-        - System requirements check
-        - Component initialization validation
-        - Data connectivity verification
-        - Model validation and testing
-        - Security validation
-        - Performance benchmarks
-        """
-        try:
-            # Run deployment validation
-            validation_result = await self.deployment_validator.validate_deployment()
-            
-            if not validation_result['success']:
-                logger.error(f"❌ Deployment validation failed: {validation_result['errors']}")
-                return False
-            
-            # Run security audit
-            security_result = await self.security_auditor.run_full_audit()
-            if not security_result['is_safe_for_github']:
-                logger.warning("⚠️ Security audit found issues - review before deployment")
-            
-            # Run comprehensive tests
-            test_result = await self.test_runner.run_comprehensive_tests()
-            if test_result['success_rate'] < 0.8:
-                logger.warning(f"⚠️ Test success rate below 80%: {test_result['success_rate']:.1%}")
-            
-            logger.info("✅ Deployment validation completed successfully")
-            return True
-            
-        except Exception as e:
-            logger.error(f"❌ Deployment validation failed: {str(e)}")
-            return False
-    
-    async def start(self):
-        """
-        Start the Quant AI Trader application.
-        
-        This method initiates the main trading loop and starts all services:
-        1. Starts the trading agent
-        2. Initiates data collection streams
-        3. Starts AI model predictions
-        4. Launches web interface
-        5. Begins monitoring and reporting
-        6. Starts health monitoring for singleton
-        """
-        try:
-            logger.info("🚀 Starting Quant AI Trader...")
-            
-            if not self.is_running:
-                self.is_running = True
-                self.start_time = datetime.now()
-                self.performance_metrics['start_time'] = self.start_time
-                
-                # Start trading agent
-                await self.trading_agent.start()
-                
-                # Start data collection
-                await self.data_fetcher.start_streaming()
-                
-                # Start AI components
-                await self.ai_integration.start()
-                
-                # Start web interface
-                await self.web_app.start()
-                
-                # Start monitoring loops
-                asyncio.create_task(self._monitoring_loop())
-                asyncio.create_task(self._health_monitoring_loop())
-                
-                logger.info("🎉 Quant AI Trader started successfully!")
-                logger.info(f"📊 Web interface available at: {self.config.get('web_app', {}).get('host', 'localhost')}:{self.config.get('web_app', {}).get('port', 8080)}")
-                logger.info(f"🔒 Singleton PID: {self.singleton_manager.current_pid}")
-                
-        except Exception as e:
-            logger.error(f"❌ Failed to start Quant AI Trader: {str(e)}")
-            logger.error(traceback.format_exc())
-            await self.stop()
-    
-    async def _monitoring_loop(self):
-        """
-        Main monitoring loop for system health and performance tracking.
-        
-        This loop continuously monitors:
-        - System health and component status
-        - Trading performance metrics
-        - Risk management alerts
-        - Security monitoring
-        - Performance attribution updates
-        """
-        while self.is_running:
-            try:
-                # Update performance metrics
-                await self._update_performance_metrics()
-                
-                # Check system health
-                await self._check_system_health()
-                
-                # Update risk management
-                await self._update_risk_management()
-                
-                # Update performance attribution
-                await self._update_performance_attribution()
-                
-                # Sleep for monitoring interval
-                await asyncio.sleep(self.config.get('monitoring', {}).get('interval', 60))
-                
-            except Exception as e:
-                logger.error(f"❌ Error in monitoring loop: {str(e)}")
-                await asyncio.sleep(10)  # Shorter sleep on error
-    
-    async def _update_performance_metrics(self):
-        """
-        Update performance metrics with current trading data.
-        
-        This method calculates and updates:
-        - Total trades and success rate
-        - P&L and drawdown metrics
-        - Sharpe ratio and other risk-adjusted returns
-        - System uptime and performance statistics
-        """
-        try:
-            if self.trading_agent:
-                # Get current trading metrics
-                metrics = await self.trading_agent.get_performance_metrics()
-                
-                # Update performance metrics
-                self.performance_metrics.update(metrics)
-                self.performance_metrics['last_update'] = datetime.now()
-                
-                # Log significant events
-                if metrics.get('total_trades', 0) > self.performance_metrics.get('total_trades', 0):
-                    logger.info(f"📈 New trade executed - Total P&L: ${metrics.get('total_pnl', 0):.2f}")
-                
-        except Exception as e:
-            logger.error(f"❌ Error updating performance metrics: {str(e)}")
-    
-    async def _check_system_health(self):
-        """
-        Check system health and component status.
-        
-        This method monitors:
-        - Data connection health
-        - AI model performance
-        - Trading agent status
-        - Risk management alerts
-        - System resource usage
-        """
-        try:
-            # Check data connections
-            if self.data_fetcher and not await self.data_fetcher.is_healthy():
-                logger.warning("⚠️ Data fetcher health check failed")
-            
-            # Check AI components
-            if self.ai_integration and not await self.ai_integration.is_healthy():
-                logger.warning("⚠️ AI integration health check failed")
-            
-            # Check trading agent
-            if self.trading_agent and not await self.trading_agent.is_healthy():
-                logger.warning("⚠️ Trading agent health check failed")
-            
-        except Exception as e:
-            logger.error(f"❌ Error checking system health: {str(e)}")
-    
-    async def _update_risk_management(self):
-        """
-        Update risk management calculations and alerts.
-        
-        This method updates:
-        - VaR calculations
-        - Position sizing recommendations
-        - Risk alerts and warnings
-        - Portfolio stress testing
-        """
-        try:
-            if self.risk_management:
-                await self.risk_management.update_risk_metrics()
-                
-                # Check for risk alerts
-                alerts = await self.risk_management.get_risk_alerts()
-                for alert in alerts:
-                    logger.warning(f"⚠️ Risk Alert: {alert}")
-                    
-        except Exception as e:
-            logger.error(f"❌ Error updating risk management: {str(e)}")
-    
-    async def _update_performance_attribution(self):
-        """
-        Update performance attribution analysis.
-        
-        This method analyzes:
-        - Sources of alpha and beta
-        - Factor contributions
-        - Risk factor exposures
-        - Performance decomposition
-        """
-        try:
-            if self.performance_attribution:
-                await self.performance_attribution.update_attribution()
-                
-        except Exception as e:
-            logger.error(f"❌ Error updating performance attribution: {str(e)}")
-    
-    async def _save_performance_metrics(self):
-        """
-        Save final performance metrics to persistent storage.
-        
-        This method saves:
-        - Complete trading history
-        - Performance statistics
-        - Risk metrics
-        - Attribution analysis
-        """
-        try:
-            # Calculate final metrics
-            if self.start_time:
-                runtime = datetime.now() - self.start_time
-                self.performance_metrics['runtime'] = str(runtime)
-            
-            # Save to file
-            import json
-            with open('performance_metrics.json', 'w') as f:
-                json.dump(self.performance_metrics, f, indent=2, default=str)
-            
-            logger.info("✅ Performance metrics saved successfully")
-            
-        except Exception as e:
-            logger.error(f"❌ Error saving performance metrics: {str(e)}")
-    
-    async def _health_monitoring_loop(self):
-        """Monitor singleton health and update health file."""
-        while self.is_running:
-            try:
-                if self.singleton_manager:
-                    self.singleton_manager.update_health()
-                    
-                await asyncio.sleep(30)  # Update health every 30 seconds
-                
-            except Exception as e:
-                logger.warning(f"Health monitoring error: {str(e)}")
-                await asyncio.sleep(60)
-    
-    def get_status(self) -> Dict[str, Any]:
-        """
-        Get current system status and performance metrics.
-        
-        Returns:
-            Dict containing system status, performance metrics, and component health
-        """
+    def _load_default_config(self) -> Dict[str, Any]:
+        """Load default configuration"""
         return {
-            'is_running': self.is_running,
-            'start_time': self.start_time,
-            'performance_metrics': self.performance_metrics,
-            'components': {
-                'trading_agent': self.trading_agent is not None,
-                'data_fetcher': self.data_fetcher is not None,
-                'ai_integration': self.ai_integration is not None,
-                'web_app': self.web_app is not None
+            "assets": ["BTC", "ETH", "SOL", "SUI", "SEI"],
+            "trading": {
+                "max_position_size": 0.1,
+                "risk_tolerance": 0.02,
+                "stop_loss_percentage": 0.05,
+                "take_profit_percentage": 0.15,
+                "paper_trading": True,
+                "initial_portfolio_value": 10000
+            },
+            "data": {
+                "update_interval": 300,  # 5 minutes
+                "lookback_period": 100,
+                "use_free_tier": True,
+                "enable_tradingview": False
+            },
+            "ai": {
+                "sentiment_analysis": True,
+                "risk_management": True,
+                "portfolio_optimization": True
+            },
+            "security": {
+                "enable_2fa": True,
+                "session_timeout": 3600,  # 1 hour
+                "max_login_attempts": 3
             }
         }
+    
+    def _check_tradingview_available(self) -> bool:
+        """Check if TradingView credentials are available"""
+        tv_username = os.getenv('TRADINGVIEW_USERNAME')
+        tv_password = os.getenv('TRADINGVIEW_PASSWORD')
+        return bool(tv_username and tv_password and FREE_DATA_AVAILABLE)
+    
+    async def initialize(self):
+        """Initialize all system components"""
+        logger.info("🔄 Initializing system components...")
+        
+        try:
+            # Initialize singleton manager
+            if SINGLETON_AVAILABLE:
+                self.singleton_manager = SingletonManager("quant_ai_trader")
+                await self.singleton_manager.acquire_lock()
+                logger.info("✅ Singleton lock acquired")
+            
+            # Initialize authentication system
+            if SECURE_AUTH_AVAILABLE:
+                self.auth_system = SecureAuthenticationSystem()
+                await self.auth_system.initialize()
+                logger.info("✅ Secure authentication initialized")
+            
+            # Initialize data sources
+            if self.use_free_data and FREE_DATA_AVAILABLE:
+                # Use free data sources
+                tv_username = os.getenv('TRADINGVIEW_USERNAME')
+                tv_password = os.getenv('TRADINGVIEW_PASSWORD')
+                
+                self.free_data_sources = FreeDataSources(
+                    tradingview_username=tv_username,
+                    tradingview_password=tv_password
+                )
+                await self.free_data_sources.__aenter__()
+                logger.info("✅ Free data sources initialized")
+                
+                if tv_username and tv_password:
+                    logger.info("✅ TradingView premium integration enabled")
+            else:
+                # Fallback to original data fetcher
+                self.data_fetcher = DataFetcher()
+                logger.info("✅ Standard data fetcher initialized")
+            
+            # Initialize AI components
+            self.technical_analyzer = TechnicalAnalyzer()
+            self.sentiment_analyzer = SentimentAnalysisEngine()
+            self.risk_manager = RiskManagementAI()
+            self.portfolio_analyzer = PortfolioAnalyzer()
+            
+            # Initialize trading agent
+            self.trading_agent = TradingAgent(
+                config=self.config,
+                data_source=self.free_data_sources if self.use_free_data else self.data_fetcher
+            )
+            
+            logger.info("✅ All components initialized successfully")
+            
+        except Exception as e:
+            logger.error(f"❌ Initialization failed: {e}")
+            await self.cleanup()
+            raise
+    
+    async def get_market_data(self, symbols: list = None) -> Dict[str, Any]:
+        """Get comprehensive market data"""
+        if symbols is None:
+            symbols = self.config["assets"]
+        
+        try:
+            if self.use_free_data and self.free_data_sources:
+                # Use free data sources
+                data = await self.free_data_sources.get_comprehensive_free_data(symbols)
+                
+                # Cache the data
+                self.market_data_cache = data
+                self.last_update = datetime.now()
+                
+                logger.info(f"📊 Retrieved free market data for {len(symbols)} symbols")
+                return data
+            
+            elif self.data_fetcher:
+                # Use standard data fetcher
+                data = {}
+                for symbol in symbols:
+                    symbol_data = await self.data_fetcher.fetch_real_time_data(symbol)
+                    if symbol_data:
+                        data[symbol] = symbol_data
+                
+                self.market_data_cache = data
+                self.last_update = datetime.now()
+                
+                logger.info(f"📊 Retrieved standard market data for {len(data)} symbols")
+                return data
+            
+            else:
+                logger.warning("❌ No data sources available")
+                return {}
+        
+        except Exception as e:
+            logger.error(f"❌ Error fetching market data: {e}")
+            return {}
+    
+    async def analyze_opportunities(self, market_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Analyze trading opportunities using AI"""
+        try:
+            opportunities = {
+                'technical_signals': {},
+                'sentiment_scores': {},
+                'risk_assessments': {},
+                'portfolio_recommendations': {},
+                'yield_opportunities': []
+            }
+            
+            symbols = self.config["assets"]
+            
+            # Technical analysis
+            for symbol in symbols:
+                if symbol in market_data.get('validated_prices', {}):
+                    price_data = market_data['validated_prices'][symbol]
+                    
+                    # Technical signals
+                    signals = await self.technical_analyzer.analyze_symbol(symbol, price_data)
+                    opportunities['technical_signals'][symbol] = signals
+                    
+                    # Sentiment analysis
+                    sentiment = await self.sentiment_analyzer.analyze_symbol_sentiment(symbol)
+                    opportunities['sentiment_scores'][symbol] = sentiment
+                    
+                    # Risk assessment
+                    risk = await self.risk_manager.assess_symbol_risk(symbol, price_data)
+                    opportunities['risk_assessments'][symbol] = risk
+            
+            # Portfolio optimization
+            portfolio_rec = await self.portfolio_analyzer.optimize_portfolio(
+                market_data, opportunities
+            )
+            opportunities['portfolio_recommendations'] = portfolio_rec
+            
+            # Yield opportunities
+            if 'yield_opportunities' in market_data:
+                opportunities['yield_opportunities'] = market_data['yield_opportunities']
+            
+            logger.info(f"🔍 Analyzed opportunities for {len(symbols)} symbols")
+            return opportunities
+        
+        except Exception as e:
+            logger.error(f"❌ Error analyzing opportunities: {e}")
+            return {}
+    
+    async def execute_trades(self, opportunities: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute trades based on opportunities (paper trading by default)"""
+        try:
+            if not self.trading_agent:
+                logger.warning("❌ Trading agent not initialized")
+                return {}
+            
+            # Execute trades through trading agent
+            trade_results = await self.trading_agent.execute_trading_strategy(opportunities)
+            
+            logger.info(f"💰 Trade execution completed: {len(trade_results)} trades")
+            return trade_results
+        
+        except Exception as e:
+            logger.error(f"❌ Error executing trades: {e}")
+            return {}
+    
+    async def run_trading_cycle(self) -> Dict[str, Any]:
+        """Run one complete trading cycle"""
+        cycle_start = datetime.now()
+        
+        try:
+            logger.info("🔄 Starting trading cycle...")
+            
+            # 1. Fetch market data
+            market_data = await self.get_market_data()
+            if not market_data:
+                logger.warning("⚠️ No market data available, skipping cycle")
+                return {}
+            
+            # 2. Analyze opportunities
+            opportunities = await self.analyze_opportunities(market_data)
+            if not opportunities:
+                logger.warning("⚠️ No opportunities found, skipping trades")
+                return {'market_data': market_data}
+            
+            # 3. Execute trades
+            trade_results = await self.execute_trades(opportunities)
+            
+            cycle_time = (datetime.now() - cycle_start).total_seconds()
+            
+            result = {
+                'timestamp': datetime.now(),
+                'cycle_time_seconds': cycle_time,
+                'market_data': market_data,
+                'opportunities': opportunities,
+                'trade_results': trade_results,
+                'status': 'success'
+            }
+            
+            logger.info(f"✅ Trading cycle completed in {cycle_time:.2f}s")
+            return result
+        
+        except Exception as e:
+            logger.error(f"❌ Trading cycle failed: {e}")
+            return {
+                'timestamp': datetime.now(),
+                'status': 'failed',
+                'error': str(e)
+            }
+    
+    async def run_continuous(self, update_interval: int = None):
+        """Run continuous trading operations"""
+        if update_interval is None:
+            update_interval = self.config["data"]["update_interval"]
+        
+        self.running = True
+        logger.info(f"🔄 Starting continuous trading (interval: {update_interval}s)")
+        
+        try:
+            while self.running:
+                # Run trading cycle
+                cycle_result = await self.run_trading_cycle()
+                
+                # Log results
+                if cycle_result.get('status') == 'success':
+                    market_data = cycle_result.get('market_data', {})
+                    trades = cycle_result.get('trade_results', {})
+                    
+                    logger.info(f"📊 Cycle summary:")
+                    logger.info(f"   • Data sources: {len(market_data.get('metadata', {}).get('sources_used', []))}")
+                    logger.info(f"   • Symbols analyzed: {len(market_data.get('market_data', []))}")
+                    logger.info(f"   • Trades executed: {len(trades)}")
+                
+                # Wait for next cycle
+                if self.running:
+                    await asyncio.sleep(update_interval)
+        
+        except KeyboardInterrupt:
+            logger.info("🛑 Received stop signal")
+        except Exception as e:
+            logger.error(f"❌ Continuous trading error: {e}")
+        finally:
+            self.running = False
+            await self.cleanup()
+    
+    def stop(self):
+        """Stop the trading system"""
+        logger.info("🛑 Stopping trading system...")
+        self.running = False
+    
+    async def cleanup(self):
+        """Clean up system resources"""
+        logger.info("🧹 Cleaning up system resources...")
+        
+        try:
+            # Close data sources
+            if self.free_data_sources:
+                await self.free_data_sources.__aexit__(None, None, None)
+            
+            # Release singleton lock
+            if self.singleton_manager:
+                await self.singleton_manager.release_lock()
+            
+            logger.info("✅ Cleanup completed")
+        
+        except Exception as e:
+            logger.error(f"❌ Cleanup error: {e}")
 
 async def main():
-    """
-    Main entry point for the Quant AI Trader application.
+    """Main application entry point"""
+    print("🚀 Quant AI Trader - Enterprise Edition")
+    print("=" * 60)
+    print("🔹 Free data sources enabled")
+    print("🔹 TradingView premium integration available")
+    print("🔹 Enterprise security with 2FA")
+    print("🔹 Asymmetric trading strategies")
+    print("=" * 60)
     
-    This function:
-    1. Creates and initializes the QuantAITrader instance
-    2. Starts the application
-    3. Handles graceful shutdown on interrupt
-    4. Provides command-line interface for basic operations
-    """
-    # Parse command line arguments
-    import argparse
-    parser = argparse.ArgumentParser(description='Quant AI Trader')
-    parser.add_argument('--config', default='config/config.yaml', help='Configuration file path')
-    parser.add_argument('--test', action='store_true', help='Run tests only')
-    parser.add_argument('--validate', action='store_true', help='Validate deployment only')
-    args = parser.parse_args()
+    # Check environment setup
+    use_free_tier = os.getenv('USE_FREE_TIER', 'true').lower() == 'true'
+    paper_trading = os.getenv('PAPER_TRADING', 'true').lower() == 'true'
     
-    # Create trader instance
-    trader = QuantAITrader(args.config)
+    print(f"📊 Data mode: {'Free tier' if use_free_tier else 'Premium APIs'}")
+    print(f"💰 Trading mode: {'Paper trading' if paper_trading else 'Live trading'}")
+    
+    if use_free_tier:
+        print("\n✅ Free Data Sources:")
+        print("   • CoinGecko Free API")
+        print("   • DexScreener API")
+        print("   • CCXT Exchange APIs")
+        print("   • Web scraping for yield opportunities")
+        
+        tv_available = os.getenv('TRADINGVIEW_USERNAME') and os.getenv('TRADINGVIEW_PASSWORD')
+        if tv_available:
+            print("   • TradingView Premium (configured)")
+        else:
+            print("   • TradingView Premium (not configured)")
     
     try:
-        # Initialize the application
-        if not await trader.initialize():
-            logger.error("❌ Failed to initialize Quant AI Trader")
-            sys.exit(1)
+        # Initialize trader
+        trader = QuantAITrader(use_free_data=use_free_tier)
+        await trader.initialize()
         
-        # Handle different modes
-        if args.test:
-            logger.info("🧪 Running tests only...")
-            test_runner = ComprehensiveTestRunner()
-            result = await test_runner.run_comprehensive_tests()
-            print(f"Test Results: {result['success_rate']:.1%} success rate")
-            sys.exit(0 if result['success_rate'] >= 0.8 else 1)
+        # Run a single cycle for testing
+        print("\n🔄 Running initial trading cycle...")
+        result = await trader.run_trading_cycle()
         
-        elif args.validate:
-            logger.info("✅ Running validation only...")
-            validator = DeploymentValidator(trader.config)
-            result = await validator.validate_deployment()
-            print(f"Validation Results: {'PASS' if result['success'] else 'FAIL'}")
-            sys.exit(0 if result['success'] else 1)
-        
-        else:
-            # Start the application
-            await trader.start()
+        if result.get('status') == 'success':
+            print("✅ Trading cycle completed successfully!")
             
-            # Keep the application running
-            try:
-                while trader.is_running:
-                    await asyncio.sleep(1)
-            except KeyboardInterrupt:
-                logger.info("🛑 Received interrupt signal, shutting down...")
-                await trader.stop()
-    
+            # Show data summary
+            market_data = result.get('market_data', {})
+            metadata = market_data.get('metadata', {})
+            
+            print(f"\n📊 Data Summary:")
+            print(f"   • Fetch time: {metadata.get('fetch_time_seconds', 0):.2f}s")
+            print(f"   • Sources used: {', '.join(metadata.get('sources_used', []))}")
+            print(f"   • Symbols found: {metadata.get('symbols_found', 0)}")
+            print(f"   • TradingView enabled: {metadata.get('tradingview_enabled', False)}")
+            
+            # Show opportunities
+            opportunities = result.get('opportunities', {})
+            print(f"   • Yield opportunities: {len(opportunities.get('yield_opportunities', []))}")
+            print(f"   • Technical signals: {len(opportunities.get('technical_signals', {}))}")
+        
+        # Ask if user wants continuous mode
+        print(f"\n🔄 Next Steps:")
+        print(f"1. Test free data: python src/free_data_demo.py")
+        print(f"2. Launch web dashboard: streamlit run src/web_dashboard.py")
+        print(f"3. View deployment guide: cat DEPLOYMENT_GUIDE.md")
+        
+        # Clean up
+        await trader.cleanup()
+        
+    except KeyboardInterrupt:
+        print("\n🛑 Interrupted by user")
     except Exception as e:
-        logger.error(f"❌ Application error: {str(e)}")
-        logger.error(traceback.format_exc())
-        await trader.stop()
-        sys.exit(1)
+        logger.error(f"❌ Application error: {e}")
+        print(f"❌ Error: {e}")
+        print("\n🔧 Troubleshooting:")
+        print("1. Check .env configuration")
+        print("2. Verify internet connection")
+        print("3. Run: pip install -r requirements.txt")
+        print("4. Check logs: tail -f quant_trader.log")
 
 if __name__ == "__main__":
     # Run the main application
