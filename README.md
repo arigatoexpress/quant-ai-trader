@@ -43,12 +43,13 @@ Get started immediately with our comprehensive free tier:
 - Python 3.8+
 - Git
 - API key from [xAI Console](https://console.x.ai/) or [OpenAI](https://platform.openai.com/)
+- **Authenticator app** (Google Authenticator, Authy, etc.) for 2FA
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/quant-ai-trader.git
+git clone https://github.com/arigatoexpress/quant-ai-trader.git
 cd quant-ai-trader
 
 # Create virtual environment
@@ -58,33 +59,65 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Setup environment
-cp env_template.txt .env
-# Edit .env file with your API keys
+# Create environment configuration
+cp .env.template .env
 ```
 
 ### Configuration
 
-1. **Edit `.env` file** with your credentials:
+Edit your `.env` file with your API keys:
+
 ```bash
-# Required: Choose one AI provider
-GROK_API_KEY=your_grok_api_key_here
-# OR
-OPENAI_API_KEY=your_openai_api_key_here
+# Essential Configuration
+GROK_API_KEY=xai-your-api-key-here
+MASTER_PASSWORD=your-secure-master-password
+JWT_SECRET_KEY=your-jwt-secret-key
+TOTP_SECRET=your-2fa-secret-key
 
-# Required: Security
-MASTER_PASSWORD=your_secure_password_here
-
-# Optional: Free tier is enabled by default
+# Trading Configuration
+PAPER_TRADING=true
 USE_FREE_TIER=true
+
+# Optional: Add your wallet addresses for portfolio tracking
+SUI_WALLET_ADDRESS=0x_your_sui_wallet_address
+SOL_WALLET_ADDRESS=your_solana_wallet_address
+ETH_WALLET_ADDRESS=0x_your_ethereum_wallet_address
 ```
 
-2. **Start the application**:
+### 🔐 Security Setup (2FA)
+
+1. **Generate 2FA Secret**: Run the system once to generate your TOTP secret
+2. **Add to Authenticator**: Scan the QR code or manually add the secret to your app
+3. **Test Login**: Use your master password + 6-digit 2FA code
+
+### Launch
+
 ```bash
-python src/main.py
+# Start the secure trading system
+python start_trader.py
+
+# Or run components separately:
+python src/secure_web_app.py    # Secure web dashboard (recommended)
+python src/web_app_legacy.py    # Legacy version (no auth)
 ```
 
-3. **Access the dashboard**: Open http://localhost:8080
+### 🎯 Access Your Dashboard
+
+1. **Open**: http://localhost:8080
+2. **Login with**:
+   - **Master Password**: From your `.env` file
+   - **2FA Code**: From your authenticator app (6 digits)
+3. **View**: Real-time prices, portfolio analysis, and trading signals
+
+### ✅ Verification
+
+The system will display current market data including:
+- **BTC**, **SUI**, **SEI** prices (real-time from CoinGecko)
+- **Portfolio analysis** across multiple chains
+- **DeFi yield opportunities** (5,796+ protocols)
+- **AI-powered trading signals**
+
+**Cost**: $0.50-$5/month (AI API usage only)
 
 ## 📊 Live Market Intelligence
 

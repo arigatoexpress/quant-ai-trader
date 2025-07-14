@@ -53,7 +53,7 @@ flask>=2.3.0
 # ============================================================================
 bcrypt>=4.0.0
 cryptography>=41.0.0
-pyjwt>=2.8.0
+PyJWT>=2.10.0             # JWT tokens for session management (secure web app)
 pyotp>=2.9.0
 qrcode>=7.4.2
 
@@ -116,7 +116,7 @@ flake8>=6.0.0
 # ============================================================================
 # 1. For minimal installation (free tier only):
 #    pip install -r requirements.txt --no-deps
-#    Then manually install: pandas numpy requests aiohttp openai streamlit
+#    Then manually install: pandas numpy requests aiohttp openai streamlit PyJWT pyotp
 #
 # 2. For full installation:
 #    pip install -r requirements.txt
@@ -130,6 +130,8 @@ flake8>=6.0.0
 #    Consider installing only if you need advanced ML features
 #
 # 5. Cloud packages are only needed for Google Cloud deployment
+#
+# 6. NEW: PyJWT and pyotp required for secure web dashboard with 2FA
 #
 # ============================================================================
 

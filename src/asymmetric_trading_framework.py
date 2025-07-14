@@ -244,8 +244,8 @@ class MaxProfitPortfolio:
                 break
         
         self.asymmetric_bets = optimized_bets
-        self.last_rebalance = datetime.now()
-        
+            self.last_rebalance = datetime.now()
+
         logger.info(f"Portfolio optimized: {len(self.asymmetric_bets)} positions, {total_capital_allocated:.1%} allocated")
 
 class MaxProfitTradingFramework:
@@ -400,9 +400,9 @@ class MaxProfitTradingFramework:
         
         # Implementation for DeFi scanning
         # This would analyze yield farms, liquidity pools, and protocol tokens
-        
-        return opportunities
-    
+            
+            return opportunities
+            
     async def _scan_options_opportunities(self, market_data: Dict[str, Any]) -> List[AsymmetricBet]:
         """Scan options markets for asymmetric opportunities."""
         opportunities = []
@@ -464,7 +464,7 @@ class MaxProfitTradingFramework:
             
         except Exception as e:
             logger.error(f"Error executing maximum profit strategy: {str(e)}")
-            return {'error': str(e)}
+            return {'error': str(e)} 
     
     async def _get_market_data(self) -> Dict[str, Any]:
         """Get current market data for analysis."""

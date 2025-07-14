@@ -7,6 +7,14 @@ from trading_agent import TradingAgent
 from news_fetcher import NewsFetcher
 from technical_analyzer import TechnicalAnalyzer
 
+# LEGACY WEB APP - USE secure_web_app.py INSTEAD
+# This file is kept for reference only
+# The new secure version has:
+# - 2FA authentication
+# - Real-time price updates
+# - Better security
+# - Correct SUI/SEI price display
+
 app = Flask(__name__)
 fetcher = DataFetcher()
 news_fetcher = NewsFetcher()
@@ -16,10 +24,11 @@ TEMPLATE = """
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Quant AI Trader</title>
+    <title>Quant AI Trader (Legacy)</title>
 </head>
 <body>
-<h1>Market Data Summary</h1>
+<h1>Market Data Summary (LEGACY VERSION)</h1>
+<p><strong>⚠️ This is the legacy version. Use the secure web app instead!</strong></p>
 <table border="1" cellpadding="5">
 <tr><th>Asset</th><th>Price (USD)</th><th>Market Cap (USD)</th><th>24h %</th><th>7d %</th><th>Ecosystem Coins</th></tr>
 {% for asset, data in assets.items() %}
@@ -159,5 +168,5 @@ def index():
     )
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
-
+    print("⚠️  LEGACY WEB APP - Use src/secure_web_app.py instead!")
+    app.run(host="0.0.0.0", port=5000) 
