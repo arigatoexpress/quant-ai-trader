@@ -1,0 +1,24 @@
+# App Engine configuration for Quant AI Trader
+# Runtime: Python 3.11 (latest stable)
+runtime: python311
+
+# Entry point: Start the secure web application
+entrypoint: python src/secure_web_app.py
+
+# Basic scaling for free tier (manual scaling alternative for cost control)
+basic_scaling:
+  max_instances: 1  # Limit to 1 instance to stay in free tier (28 free hours/day)
+  idle_timeout: 10m  # Shut down after 10 min idle to save costs
+
+# Environment variables
+# Reference secrets from Secret Manager for security
+env_variables:
+  GROK_API_KEY: "@GROK_API_KEY"  # Pulled from Secret Manager at runtime
+  PAPER_TRADING: "true"  # Enable safe paper trading mode
+  USE_FREE_TIER: "true"  # Use free data sources
+
+# Handlers (optional: secure all paths)
+handlers:
+- url: /.*
+  script: auto
+  secure: always  # Force HTTPS for security 

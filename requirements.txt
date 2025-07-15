@@ -58,6 +58,13 @@ pyotp>=2.9.0
 qrcode>=7.4.2
 
 # ============================================================================
+# SOCIAL DATA FETCHING
+# ============================================================================
+telethon>=2.0.0              # Telegram API client
+tweepy>=4.0.0               # Twitter API client
+praw>=7.0.0                 # Reddit API client
+
+# ============================================================================
 # DATABASE
 # ============================================================================
 sqlalchemy>=2.0.0
@@ -102,6 +109,7 @@ google-cloud-logging>=3.6.0
 google-cloud-compute>=1.14.0
 google-cloud-sql>=3.5.0
 google-cloud-secret-manager>=2.16.0
+google-cloud-aiplatform>=1.30.0  # Vertex AI for advanced analysis
 
 # ============================================================================
 # DEVELOPMENT AND TESTING
@@ -116,7 +124,7 @@ flake8>=6.0.0
 # ============================================================================
 # 1. For minimal installation (free tier only):
 #    pip install -r requirements.txt --no-deps
-#    Then manually install: pandas numpy requests aiohttp openai streamlit PyJWT pyotp
+#    Then manually install: pandas numpy requests aiohttp openai streamlit PyJWT pyotp telethon tweepy praw
 #
 # 2. For full installation:
 #    pip install -r requirements.txt
@@ -131,7 +139,8 @@ flake8>=6.0.0
 #
 # 5. Cloud packages are only needed for Google Cloud deployment
 #
-# 6. NEW: PyJWT and pyotp required for secure web dashboard with 2FA
+# 6. NEW: Social fetching added for Telegram/Twitter/Reddit integration
+# 7. NEW: google-cloud-aiplatform for Vertex AI integration
 #
 # ============================================================================
 
