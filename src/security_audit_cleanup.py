@@ -426,9 +426,9 @@ class SecurityCleanup:
     """Performs security cleanup operations"""
     
     def __init__(self):
-        self.backup_dir = None
+        self.backup_dir: Optional[str] = None
         
-    def create_backup(self, directory_path: str) -> str:
+    def create_backup(self, directory_path: str) -> Optional[str]:
         """Create a backup of the directory before cleanup"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup_name = f"backup_{timestamp}"
@@ -462,20 +462,23 @@ class SecurityCleanup:
                         
                         # Replace with placeholder
                         if 'api_key' in original_line.lower() or 'apikey' in original_line.lower():
-                            new_line = original_line.replace(
-                                re.search(r'["\']?[a-zA-Z0-9]{20,}["\']?', original_line).group(),
-                                '"YOUR_API_KEY_HERE"'
-                            )
+                            match = re.search(r'["\']?[a-zA-Z0-9]{20,}["\']?', original_line)
+                            if match:
+                                new_line = original_line.replace(match.group(), '"YOUR_API_KEY_HERE"')
+                            else:
+                                new_line = original_line # Or handle error appropriately
                         elif 'password' in original_line.lower():
-                            new_line = original_line.replace(
-                                re.search(r'["\']?[^"\']+["\']?', original_line).group(),
-                                os.getenv("AUDIT_PASSWORD", "audit_password")
-                            )
+                            match = re.search(r'["\']?[^"\']+["\']?', original_line)
+                            if match:
+                                new_line = original_line.replace(match.group(), os.getenv("AUDIT_PASSWORD", "audit_password"))
+                            else:
+                                new_line = original_line
                         else:
-                            new_line = original_line.replace(
-                                re.search(r'["\']?[a-zA-Z0-9]{20,}["\']?', original_line).group(),
-                                '"SECRET_REMOVED"'
-                            )
+                            match = re.search(r'["\']?[a-zA-Z0-9]{20,}["\']?', original_line)
+                            if match:
+                                new_line = original_line.replace(match.group(), '"SECRET_REMOVED"')
+                            else:
+                                new_line = original_line
                         
                         lines[issue.line_number - 1] = new_line
                         
@@ -627,7 +630,9 @@ class SecurityAuditor:
         categorized_issues = self._categorize_issues()
         
         # Generate report
-        report = self._generate_report(categorized_issues, backup_path)
+        report = {}
+        if backup_path:
+            report = self._generate_report(categorized_issues, backup_path)
         
         self.scan_results = report
         return report
@@ -653,7 +658,7 @@ class SecurityAuditor:
         
         return categorized
     
-    def _generate_report(self, categorized_issues: Dict[str, List[SecurityIssue]], backup_path: str) -> Dict[str, Any]:
+    def _generate_report(self, categorized_issues: Dict[str, List[SecurityIssue]], backup_path: Optional[str]) -> Dict[str, Any]:
         """Generate comprehensive security report"""
         total_issues = len(self.all_issues)
         
