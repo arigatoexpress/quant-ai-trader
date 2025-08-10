@@ -19,7 +19,8 @@ asyncio-throttle>=1.0.2
 # ============================================================================
 yfinance>=0.2.12
 ccxt>=4.0.0
-tvdatafeed>=2.0.0  # TradingView integration
+# TradingView Data
+# tvdatafeed>=2.0.0  # TradingView integration
 beautifulsoup4>=4.12.0  # Web scraping
 lxml>=4.9.0  # XML parsing
 
@@ -27,10 +28,10 @@ lxml>=4.9.0  # XML parsing
 # AI AND MACHINE LEARNING
 # ============================================================================
 openai>=1.0.0  # For Grok/OpenAI API
-torch>=2.0.0
-transformers>=4.30.0
-xgboost>=1.7.0
-tensorflow>=2.13.0
+# torch>=2.0.0
+# transformers>=4.30.0
+# xgboost>=1.7.0
+# tensorflow>=2.13.0
 
 # ============================================================================
 # TECHNICAL ANALYSIS
@@ -60,7 +61,8 @@ qrcode>=7.4.2
 # ============================================================================
 # SOCIAL DATA FETCHING
 # ============================================================================
-telethon>=2.0.0              # Telegram API client
+# Social Media & Messaging
+# telethon>=2.0.0  # Telegram API
 tweepy>=4.0.0               # Twitter API client
 praw>=7.0.0                 # Reddit API client
 
@@ -107,7 +109,7 @@ google-cloud-storage>=2.10.0
 google-cloud-monitoring>=2.15.0
 google-cloud-logging>=3.6.0
 google-cloud-compute>=1.14.0
-google-cloud-sql>=3.5.0
+google-cloud-sql-python-connector>=1.0.0  # For Cloud SQL connection
 google-cloud-secret-manager>=2.16.0
 google-cloud-aiplatform>=1.30.0  # Vertex AI for advanced analysis
 
