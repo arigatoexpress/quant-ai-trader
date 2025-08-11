@@ -97,7 +97,7 @@ class FreeDataSources:
         self.exchanges = {
             'binance': ccxt.binance({'enableRateLimit': True}),
             'kraken': ccxt.kraken({'enableRateLimit': True}),
-            'coinbase': ccxt.coinbasepro({'enableRateLimit': True}),
+            'coinbase': ccxt.coinbase({'enableRateLimit': True}),
         }
         
         # Free API endpoints

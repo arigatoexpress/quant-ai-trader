@@ -334,7 +334,7 @@ class AuthenticationManager:
     def _verify_password(self, user_id: str, password: str) -> bool:
         """Verify password (simplified for demo)"""
         # In production, use secure password hashing
-        return password == "secure_trading_password_2024"
+        return password == os.getenv("USER_PASSWORD", "secure_trading_password_2024")
     
     def _revoke_token(self, token_id: str):
         """Revoke authentication token"""
@@ -634,8 +634,8 @@ def main():
     
     # Initialize security with API key
     token = framework.initialize_security(
-        grok_api_key="demo_api_key_12345",
-        user_password="secure_trading_password_2024"
+        grok_api_key=os.getenv("GROK_API_KEY", "demo_api_key_12345"),
+        user_password=os.getenv("USER_PASSWORD", "secure_trading_password_2024")
     )
     
     print(f"✅ Security initialized. Token: {token.token_id[:8]}...")

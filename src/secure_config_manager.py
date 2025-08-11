@@ -247,7 +247,7 @@ class SecureConfigManager:
     def get_security_config(self) -> Dict[str, Any]:
         """Get security configuration"""
         return {
-            'master_password': self.config_data.get('master_password', 'secure_trading_password_2024'),
+            'master_password': os.getenv('MASTER_PASSWORD'),
             'session_timeout': self.config_data.get('session_timeout', 3600),
             'max_login_attempts': self.config_data.get('max_login_attempts', 3),
             'encryption_enabled': True,
@@ -342,7 +342,7 @@ SEI_WALLET_1=your_sei_wallet_address_1
 # =============================================================================
 # SECURITY SETTINGS
 # =============================================================================
-os.getenv("MASTER_PASSWORD", "secure_trading_password_2024")
+MASTER_PASSWORD=your_secure_password_here
 SESSION_TIMEOUT=3600
 MAX_LOGIN_ATTEMPTS=3
 
@@ -386,7 +386,6 @@ EMAIL_NOTIFICATIONS=false
 EMAIL_SMTP_HOST=smtp.gmail.com
 EMAIL_SMTP_PORT=587
 EMAIL_USERNAME=your_email@gmail.com
-os.getenv("MASTER_PASSWORD", "secure_trading_password_2024")
 """
         
         # Write template to file

@@ -39,6 +39,8 @@ from secure_authentication import SecureAuthenticationSystem, create_default_sys
 from singleton_manager import get_global_singleton
 from asymmetric_trading_framework import MaxProfitTradingFramework
 
+from sui_volume_predictor import get_volume_predictions
+
 logger = logging.getLogger(__name__)
 
 class TradingDashboard:
@@ -245,7 +247,8 @@ class TradingDashboard:
             "🛡️ Risk Management",
             "🤖 AI Models",
             "🔐 Security",
-            "⚙️ Settings"
+            "⚙️ Settings",
+            "📉 Volume Predictor"  # New tab for volume predictions
         ])
     
     def _render_status_bar(self):
@@ -303,6 +306,9 @@ class TradingDashboard:
         
         with tabs[7]:  # Settings
             self._render_settings_tab()
+
+        with tabs[8]:  # Volume Predictor
+            self._render_volume_predictor_tab()
     
     def _render_overview_tab(self):
         """Render overview dashboard."""
@@ -699,6 +705,19 @@ class TradingDashboard:
             }
             self._save_settings(settings)
             st.success("Settings saved successfully")
+    
+    def _render_volume_predictor_tab(self):
+        """Render volume predictor tab."""
+        st.subheader("Full Sail Finance Volume Predictor")
+        with st.spinner("Calculating volume predictions..."):
+            predictions = get_volume_predictions()
+        if predictions:
+            df = pd.DataFrame(list(predictions.items()), columns=['Pool', 'Predicted Volume'])
+            df['Predicted Volume'] = df['Predicted Volume'].apply(lambda x: f"{x:,.2f}")
+            st.dataframe(df, use_container_width=True)
+        else:
+            st.info("No pools or predictions available.")
+        st.markdown("Predictions based on linear regression of historical weekly volumes from Sui blockchain.")
     
     # Helper methods for data retrieval and processing
     def _get_system_status(self) -> Dict:

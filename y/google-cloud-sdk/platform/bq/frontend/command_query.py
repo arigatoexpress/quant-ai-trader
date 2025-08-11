@@ -624,7 +624,7 @@ class Query(bigquery_command.BigqueryCmd):
         frontend_utils.PrintDryRunInfo(execution)
       else:
         bq_cached_client.Factory.ClientTablePrinter.GetTablePrinter().PrintTable(
-            fields, rows
+            fields, rows, use_full_timestamp=False
         )
         # If we are here, the job succeeded, but print warnings if any.
         frontend_utils.PrintJobMessages(execution)
@@ -633,6 +633,8 @@ class Query(bigquery_command.BigqueryCmd):
         kwds['write_disposition'] = 'WRITE_APPEND'
       if self.destination_table and self.replace:
         kwds['write_disposition'] = 'WRITE_TRUNCATE'
+      if self.destination_table and self.replace_data:
+        kwds['write_disposition'] = 'WRITE_TRUNCATE_DATA'
       if self.require_cache:
         kwds['create_disposition'] = 'CREATE_NEVER'
       if (
@@ -836,7 +838,7 @@ class Query(bigquery_command.BigqueryCmd):
           max_rows=self.max_rows,
       )
       bq_cached_client.Factory.ClientTablePrinter.GetTablePrinter().PrintTable(
-          fields, rows
+          fields, rows, use_full_timestamp=False
       )
     elif json_escape:
       print(

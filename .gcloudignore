@@ -12,7 +12,13 @@
 # below:
 .git
 .gitignore
-
+venv/
+.venv/
+y/
+.devcontainer/
+node_modules/
+backups/
+logs/
 # Python pycache:
 __pycache__/
 # Ignored by the build system

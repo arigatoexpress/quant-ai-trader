@@ -71,6 +71,7 @@ platform/bq/gcloud_wrapper/bq_to_gcloud_command_executor.py
 platform/bq/gcloud_wrapper/bq_to_gcloud_config_classes.py
 platform/bq/gcloud_wrapper/gcloud_runner.py
 platform/bq/gcloud_wrapper/supported_commands/supported_commands_dataset.py
+platform/bq/gcloud_wrapper/supported_commands/supported_commands_migration_workflow.py
 platform/bq/gcloud_wrapper/supported_commands/supported_commands_project.py
 platform/bq/gcloud_wrapper/supported_gcloud_commands.py
 platform/bq/remove_pyreadline.py

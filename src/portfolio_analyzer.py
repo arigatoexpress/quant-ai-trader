@@ -58,7 +58,7 @@ class MultiChainPortfolioAnalyzer:
     def __init__(self, config_path=None):
         # Load configuration
         if config_path is None:
-            config_path = '../config/config.yaml'
+            config_path = 'config/config.yaml'
         
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)

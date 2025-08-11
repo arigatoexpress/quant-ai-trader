@@ -266,13 +266,13 @@ def demonstrate_complete_system():
     print("🔧 SYSTEM INITIALIZATION")
     print("=" * 60)
     
-    secure_system = SecureAgenticElizaOS(master_key="demo_master_key_2024")
+    secure_system = SecureAgenticElizaOS(master_key=os.getenv("MASTER_KEY", "demo_master_key_2024"))
     
     # Initialize with demo credentials
     print("🔐 Initializing secure trading system...")
     success = secure_system.initialize_secure_trading(
         grok_api_key=os.getenv("GROK_API_KEY", "your_api_key_here"),
-        user_password="secure_password"
+        user_password=os.getenv("USER_PASSWORD", "secure_password")
     )
     
     if not success:
