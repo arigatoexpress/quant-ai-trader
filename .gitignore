@@ -54,6 +54,7 @@ config/secrets.yaml
 config/api_keys.yaml
 config/credentials.yaml
 config/.encryption_key
+config/.jwt_secret
 *.key
 *.pem
 *.crt

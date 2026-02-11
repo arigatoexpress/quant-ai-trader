@@ -31,9 +31,9 @@ fetcher = DataFetcher()
 news_fetcher = NewsFetcher()
 
 # Security configuration
-MASTER_PASSWORD = os.environ.get('MASTER_PASSWORD', 'swi85oBRFhxCLUeclY6j6dCka+a0EnA45IX3R2hWU6U=')
-TOTP_SECRET = os.environ.get('TOTP_SECRET', 'ESZS4FIHSIBPXUO7IO26WDZA44DHYUGK')
-JWT_SECRET = os.environ.get('JWT_SECRET_KEY', 'WQ2lVA+XmWiYwu+adRIBv+HJqzBNSWV05UpJr22/ks+u0aQ2MudxhmovI+0H1tzi')
+MASTER_PASSWORD = os.environ.get('MASTER_PASSWORD', '')
+TOTP_SECRET = os.environ.get('TOTP_SECRET', '')
+JWT_SECRET = os.environ.get('JWT_SECRET_KEY', '')
 
 def require_auth(f):
     """Decorator to require authentication"""
