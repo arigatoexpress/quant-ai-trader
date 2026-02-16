@@ -1,10 +1,10 @@
 # quant-ai-trader — Agent Notes
 
-Status: ACTIVE
+Status: ARCHIVED (superseded by `arigatoexpress/Sapphire`)
 Remote: https://github.com/arigatoexpress/quant-ai-trader.git
 
 Purpose:
-- VRAM AI Agent
+- Legacy Quant AI Trader prototype (retained for reference)
 
 Start:
 - `README.md`
@@ -16,4 +16,3 @@ Key Paths:
 - `config/`
 - `scripts/`
 - `src/`
-- `y/`

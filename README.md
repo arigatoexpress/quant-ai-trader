@@ -1,5 +1,7 @@
 # 🚀 Quant AI Trader
 
+> Status: **ARCHIVED** (superseded by `arigatoexpress/Sapphire`). This repo is retained for historical reference only.
+
 > **Enterprise-grade automated trading system with institutional-quality AI analysis and comprehensive DeFi market intelligence - completely free tier available**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -544,4 +546,3 @@ Special thanks to:
 [🚀 Get Started](#quick-start-5-minutes) • [📊 Live Demo](https://demo.quant-ai-trader.com) • [📚 Documentation](docs/) • [💬 Community](https://discord.gg/quant-ai-trader)
 
 </div>
-
