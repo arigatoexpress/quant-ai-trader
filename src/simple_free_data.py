@@ -282,8 +282,8 @@ class SimpleFreeDataSources:
                 
                 logger.info(f"✅ Retrieved {len(opportunities)} real DeFi opportunities from DeFi Llama")
                 return opportunities
-                
-                 except ImportError:
+
+        except ImportError:
             logger.warning("DeFi Llama integration not available, using mock data")
             return self._get_mock_yield_opportunities()
         except Exception as e:

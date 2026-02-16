@@ -184,3 +184,6 @@ data/*.csv
 historical_data/
 market_data/
 price_feeds/
+
+# Vendored SDKs (install via system packages instead)
+y/

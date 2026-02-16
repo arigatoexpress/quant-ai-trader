@@ -25,7 +25,6 @@ quant-ai-trader/
   scripts/                 # Deployment scripts (deploy_gcp.sh)
   start_trader.py          # Entry point with env validation
   docker-compose.yml       # Postgres + Grafana + app
-  y/google-cloud-sdk/      # Vendored GCP SDK (~4000 files, dockerignored)
 ```
 
 **Flow:** DataFetcher → TechnicalAnalyzer → SentimentAnalyzer → TradingAgent
@@ -52,4 +51,4 @@ Optional:
 - `config/.encryption_key` and `config/.jwt_secret` are gitignored
 - Docker-compose passwords use `${POSTGRES_PASSWORD:-changeme}` and `${GRAFANA_ADMIN_PASSWORD:-changeme}`
 - Free tier costs ~$0.50-5/month (AI API usage only)
-- `y/google-cloud-sdk/` is vendored and excluded from Docker builds
+- Deploy scripts expect `gcloud` to be installed and available on `PATH`
